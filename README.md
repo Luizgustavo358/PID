@@ -6,9 +6,10 @@ Sobre:
 Aplicativo que determina o número de questões marcadas corretamente em uma prova objetiva,
 utilizando processamento de imagem.
 
-** Professor **: Alexei
+### Professor:
+Alexei
 
-** Grupo **:
+### Grupo:
 - Álefe
 - Luiz Gustavo
 - Rubens
