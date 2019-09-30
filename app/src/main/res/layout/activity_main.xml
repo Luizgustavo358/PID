@@ -44,7 +44,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:text="option1"
+                    android:text="Sua Prova"
 
                     android:textStyle="bold" />
             </com.google.android.material.card.MaterialCardView>
@@ -57,7 +57,7 @@
                 android:focusable="false"
                 app:borderWidth="0dp"
                 app:fabSize="mini"
-                app:srcCompat="@drawable/ic_extension_black_24dp" />
+                app:srcCompat="@drawable/ic_camera_alt_black_24dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -77,7 +77,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:text="option2"
+                    android:text="Prova em Branco"
 
                     android:textStyle="bold" />
             </com.google.android.material.card.MaterialCardView>
@@ -90,7 +90,7 @@
                 android:focusable="false"
                 app:borderWidth="0dp"
                 app:fabSize="mini"
-                app:srcCompat="@drawable/ic_extension_black_24dp" />
+                app:srcCompat="@drawable/ic_insert_drive_file_black_24dp" />
         </LinearLayout>
 
 
@@ -113,7 +113,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:text="option3"
+                    android:text="Gabarito"
 
                     android:textStyle="bold" />
             </com.google.android.material.card.MaterialCardView>
@@ -128,7 +128,7 @@
                 app:borderWidth="0dp"
                 app:fabSize="mini"
 
-                app:srcCompat="@drawable/ic_extension_black_24dp"/>
+                app:srcCompat="@drawable/ic_check_circle_black_24dp"/>
         </LinearLayout>
     </LinearLayout>
 
