@@ -1,11 +1,5 @@
 package com.example.pid;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
-
-import android.Manifest;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -14,9 +8,7 @@ import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
@@ -26,7 +18,11 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
+
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -39,8 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import static android.os.Environment.getExternalStorageDirectory;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -59,8 +54,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView imageView;
 
-    private static final int CAMERA_REQUEST = 1;
     private final static int IMAGE_RESULT = 200;
+    private Bitmap bitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,17 +75,39 @@ public class MainActivity extends AppCompatActivity {
      * Set the activity listener behaviours.
      */
     private void setListeners() {
-        option1Layout.setOnClickListener(view -> {
-            dispatchTakePictureIntent();
-        });
+        option1Layout.setOnClickListener(this::dispatchTakePictureIntent);
 
-        option2Layout.setOnClickListener(view ->
-                startActivityForResult(getPickImageChooserIntent(), IMAGE_RESULT)
-        );
+        option2Layout.setOnClickListener(this::choosePictureFromSomewhere);
 
-        option3Layout.setOnClickListener(view ->
-                Toast.makeText(this, "Option 3", Toast.LENGTH_SHORT).show()
-        );
+    }
+
+    private void choosePictureFromSomewhere(View view) {
+        List<Intent> allIntents = new ArrayList<>();
+        PackageManager packageManager = getPackageManager();
+
+        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        galleryIntent.setType("image/*");
+        List<ResolveInfo> listGallery = packageManager.queryIntentActivities(galleryIntent, 0);
+        for (ResolveInfo res : listGallery) {
+            Intent intent = new Intent(galleryIntent);
+            intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+            intent.setPackage(res.activityInfo.packageName);
+            allIntents.add(intent);
+        }
+
+        Intent mainIntent = allIntents.get(allIntents.size() - 1);
+        for (Intent intent : allIntents) {
+            if (Objects.requireNonNull(intent.getComponent()).getClassName().equals("com.android.documentsui.DocumentsActivity")) {
+                mainIntent = intent;
+                break;
+            }
+        }
+        allIntents.remove(mainIntent);
+
+        Intent chooserIntent = Intent.createChooser(mainIntent, "Selecione fonte");
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, allIntents.toArray(new Parcelable[0]));
+
+        startActivityForResult(chooserIntent, IMAGE_RESULT);
     }
 
 
@@ -101,17 +118,13 @@ public class MainActivity extends AppCompatActivity {
             setPic();
             galleryAddPic();
         } else if (requestCode == IMAGE_RESULT && resultCode == Activity.RESULT_OK) {
-            boolean isCamera = data == null || data.getData() == null;
-            if(isCamera){
-
-            }
-
 
             String filePath = getImageFilePath(data);
             if (filePath != null) {
-                Bitmap selectedImage = BitmapFactory.decodeFile(filePath);
-                imageView.setImageBitmap(selectedImage);
+                bitmap = BitmapFactory.decodeFile(filePath);
+                imageView.setImageBitmap(bitmap);
             }
+
 
         }
     }
@@ -134,7 +147,9 @@ public class MainActivity extends AppCompatActivity {
         Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
         int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
         cursor.moveToFirst();
-        return cursor.getString(column_index);
+        String path = cursor.getString(column_index);
+        cursor.close();
+        return path;
     }
 
 
@@ -147,54 +162,9 @@ public class MainActivity extends AppCompatActivity {
         return outputFileUri;
     }
 
-    public Intent getPickImageChooserIntent() {
-
-        Uri outputFileUri = getCaptureImageOutputUri();
-
-        List<Intent> allIntents = new ArrayList<>();
-        PackageManager packageManager = getPackageManager();
-
-        Intent captureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        List<ResolveInfo> listCam = packageManager.queryIntentActivities(captureIntent, 0);
-        for (ResolveInfo res : listCam) {
-            Intent intent = new Intent(captureIntent);
-            intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-            intent.setPackage(res.activityInfo.packageName);
-            if (outputFileUri != null) {
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
-            }
-            allIntents.add(intent);
-        }
-
-        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        galleryIntent.setType("image/*");
-        List<ResolveInfo> listGallery = packageManager.queryIntentActivities(galleryIntent, 0);
-        for (ResolveInfo res : listGallery) {
-            Intent intent = new Intent(galleryIntent);
-            intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-            intent.setPackage(res.activityInfo.packageName);
-            allIntents.add(intent);
-        }
-
-        Intent mainIntent = allIntents.get(allIntents.size() - 1);
-        for (Intent intent : allIntents) {
-            if (intent.getComponent().getClassName().equals("com.android.documentsui.DocumentsActivity")) {
-                mainIntent = intent;
-                break;
-            }
-        }
-        allIntents.remove(mainIntent);
-
-        Intent chooserIntent = Intent.createChooser(mainIntent, "Selecione fonte");
-        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, allIntents.toArray(new Parcelable[allIntents.size()]));
-
-        return chooserIntent;
-    }
-
 
     String currentPhotoPath;
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
@@ -220,17 +190,15 @@ public class MainActivity extends AppCompatActivity {
 
     static final int REQUEST_TAKE_PHOTO = 1;
 
-    private void dispatchTakePictureIntent() {
+    private void dispatchTakePictureIntent(View view) {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             // Create the File where the photo should go
-            File photoFile = null;
+            File photoFile;
             try {
                 photoFile = createImageFile();
             } catch (IOException ex) {
-                ex.printStackTrace();
-                System.err.println("ERRRRRRRRRRRRRRRRRRRROU");
                 throw new RuntimeException(ex);
             }
             // Continue only if the File was successfully created
@@ -274,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
 
-        Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
+        bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
         imageView.setImageBitmap(bitmap);
     }
 

@@ -55,7 +55,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:text="Sua Prova"
+                    android:text="Câmera"
 
                     android:textStyle="bold" />
             </com.google.android.material.card.MaterialCardView>
@@ -88,7 +88,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:text="Prova em Branco"
+                    android:text="Galeria"
 
                     android:textStyle="bold" />
             </com.google.android.material.card.MaterialCardView>
@@ -101,7 +101,7 @@
                 android:focusable="false"
                 app:borderWidth="0dp"
                 app:fabSize="mini"
-                app:srcCompat="@drawable/ic_insert_drive_file_black_24dp" />
+                app:srcCompat="@drawable/ic_gallery" />
         </LinearLayout>
 
 
@@ -111,7 +111,7 @@
             android:id="@+id/option3"
             android:layout_width="wrap_content"
             android:layout_height="55dp"
-
+android:visibility="gone"
             android:gravity="center_vertical|end"
             android:orientation="horizontal">
 
