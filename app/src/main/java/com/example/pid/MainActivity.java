@@ -1,11 +1,16 @@
 package com.example.pid;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -28,6 +33,10 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout option2Layout;
     private LinearLayout option3Layout;
 
+    private ImageView imageView;
+
+    private static final int CAMERA_REQUEST = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,17 +55,29 @@ public class MainActivity extends AppCompatActivity {
      * Set the activity listener behaviours.
      */
     private void setListeners() {
-        option1Layout.setOnClickListener(view ->
-            Toast.makeText(this, "Option 1", Toast.LENGTH_SHORT).show()
-        );
+        option1Layout.setOnClickListener(view -> {
+            Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+            startActivityForResult(intent, CAMERA_REQUEST);
+        });
 
         option2Layout.setOnClickListener(view ->
-            Toast.makeText(this, "Option 2", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Option 2", Toast.LENGTH_SHORT).show()
         );
 
         option3Layout.setOnClickListener(view ->
-            Toast.makeText(this, "Option 3", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Option 3", Toast.LENGTH_SHORT).show()
         );
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK)
+        {
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+            imageView.setImageBitmap(photo);
+        }
     }
 
     /**
@@ -69,8 +90,8 @@ public class MainActivity extends AppCompatActivity {
         option2Layout = findViewById(R.id.option2);
         option3Layout = findViewById(R.id.option3);
         fabPhoto = findViewById(R.id.fab_photo);
+        imageView = findViewById(R.id.imageView);
     }
-
 
 
     /**
