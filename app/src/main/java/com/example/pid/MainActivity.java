@@ -13,11 +13,17 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.util.Log;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 
 
 import androidx.annotation.Nullable;
@@ -26,7 +32,10 @@ import androidx.core.content.FileProvider;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +46,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements CvCameraViewListener2 {
 
 
     Animation hideLayout;
@@ -50,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout subFab;
     private LinearLayout option1Layout;
     private LinearLayout option2Layout;
-    private LinearLayout option3Layout;
 
     private ImageView imageView;
 
@@ -68,6 +76,10 @@ public class MainActivity extends AppCompatActivity {
         setFabAnimations();
         setListeners();
 
+
+        mOpenCvCameraView = findViewById(R.id.HelloOpenCvView);
+        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+        mOpenCvCameraView.setCvCameraViewListener(this);
     }
 
 
@@ -254,7 +266,6 @@ public class MainActivity extends AppCompatActivity {
         shadowView = findViewById(R.id.shadowView);
         option1Layout = findViewById(R.id.option1);
         option2Layout = findViewById(R.id.option2);
-        option3Layout = findViewById(R.id.option3);
         fabPhoto = findViewById(R.id.fab_photo);
         imageView = findViewById(R.id.imageView);
     }
@@ -360,5 +371,70 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void onCameraViewStarted(int width, int height) {
+
+    }
+
+    @Override
+    public void onCameraViewStopped() {
+
+    }
+
+    @Override
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+
+        Mat src = inputFrame.gray();
+        Mat cannyEdges = new Mat();
+
+        Imgproc.Canny(src, cannyEdges, 10, 100);
+
+        return cannyEdges;
+    }
+
+    private static final String TAG = "MYAPP::OPENCV";
+    private CameraBridgeViewBase mOpenCvCameraView;
+
+    BaseLoaderCallback mCallBack = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case BaseLoaderCallback.SUCCESS:
+                    Log.i(TAG, "OpenCV loaded successfully");
+                    mOpenCvCameraView.enableView();
+                    break;
+                default:
+                    super.onManagerConnected(status);
+                    break;
+            }
+        }
+    };
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mCallBack);
+        } else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            mCallBack.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
     }
 }
