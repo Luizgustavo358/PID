@@ -100,8 +100,11 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
             Utils.bitmapToMat(bmp32, mat);
             Mat destination = new Mat();
             Imgproc.cvtColor(mat, destination, Imgproc.COLOR_RGB2GRAY);
+            Utils.matToBitmap(destination, bitmap);
+            imageView.setImageBitmap(bitmap);
+
             Mat destination2 = new Mat();
-            Imgproc.adaptiveThreshold(destination, destination2, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 7);
+            Imgproc.adaptiveThreshold(destination, destination2, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 91, 15);
 
             Utils.matToBitmap(destination2, bitmap);
             storeImage(bitmap);
