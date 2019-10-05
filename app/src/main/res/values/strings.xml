@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">PID Test</string>
+    <string name="gabarito">Gabarito</string>
+    <string name="galeria">Galeria</string>
+    <string name="camera">Câmera</string>
+    <string name="limiarizar">Limiarizar</string>
+    <string name="foto">Foto</string>
 </resources>

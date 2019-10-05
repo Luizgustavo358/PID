@@ -22,6 +22,7 @@
 
             <ImageView
                 android:id="@+id/imageView"
+                android:contentDescription="@string/foto"
                 android:layout_width="match_parent"
                 android:layout_height="400dp"
                 tools:srcCompat="@tools:sample/avatars" />
@@ -30,7 +31,7 @@
                 android:id="@+id/button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Limiarizar"
+                android:text="@string/limiarizar"
                 android:visibility="invisible" />
         </LinearLayout>
 
@@ -53,7 +54,7 @@
         android:id="@+id/shadowView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#D2FFFFFF"
+        android:background="@color/app_background"
         android:visibility="gone" />
 
     <LinearLayout
@@ -85,7 +86,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:text="Câmera"
+                    android:text="@string/camera"
 
                     android:textStyle="bold" />
             </com.google.android.material.card.MaterialCardView>
@@ -93,7 +94,7 @@
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#fff"
+                android:backgroundTint="@color/branco"
                 android:clickable="false"
                 android:focusable="false"
                 app:borderWidth="0dp"
@@ -118,7 +119,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:text="Galeria"
+                    android:text="@string/galeria"
 
                     android:textStyle="bold" />
             </com.google.android.material.card.MaterialCardView>
@@ -126,7 +127,7 @@
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#fff"
+                android:backgroundTint="@color/branco"
                 android:clickable="false"
                 android:focusable="false"
                 app:borderWidth="0dp"
@@ -151,7 +152,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:text="Gabarito"
+                    android:text="@string/gabarito"
                     android:textStyle="bold" />
             </com.google.android.material.card.MaterialCardView>
 
@@ -159,7 +160,7 @@
 
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#fff"
+                android:backgroundTint="@color/branco"
                 android:clickable="false"
                 android:focusable="false"
                 app:borderWidth="0dp"
@@ -176,7 +177,7 @@
         android:layout_margin="@dimen/fab_margin"
         app:fabSize="normal"
         app:borderWidth="0dp"
-        android:backgroundTint="#9143B0"
+        android:backgroundTint="@color/colorPrimaryDark"
         app:srcCompat="@drawable/arrow_up_white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
