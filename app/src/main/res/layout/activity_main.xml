@@ -8,43 +8,47 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity"
     tools:ignore="AutoFill">
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:visibility="visible">
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="400dp"
-        tools:srcCompat="@tools:sample/avatars" />
-
-    <Button
-        android:id="@+id/button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Limiarizar" />
-</LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone">
-    <org.opencv.android.JavaCameraView
-        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible"
-        android:id="@+id/HelloOpenCvView"
-        opencv:show_fps="true"
-        opencv:camera_id="any" />
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="match_parent"
+                android:layout_height="400dp"
+                tools:srcCompat="@tools:sample/avatars" />
+
+            <Button
+                android:id="@+id/button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Limiarizar"
+                android:visibility="invisible" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <org.opencv.android.JavaCameraView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible"
+                android:id="@+id/HelloOpenCvView"
+                opencv:show_fps="true"
+                opencv:camera_id="any" />
+        </LinearLayout>
     </LinearLayout>
 
-</LinearLayout>
     <View
         android:id="@+id/shadowView"
         android:layout_width="match_parent"
@@ -130,14 +134,11 @@
                 app:srcCompat="@drawable/ic_gallery" />
         </LinearLayout>
 
-
-
-
         <LinearLayout
             android:id="@+id/option3"
             android:layout_width="wrap_content"
             android:layout_height="55dp"
-android:visibility="gone"
+            android:visibility="gone"
             android:gravity="center_vertical|end"
             android:orientation="horizontal">
 
@@ -151,7 +152,6 @@ android:visibility="gone"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
                     android:text="Gabarito"
-
                     android:textStyle="bold" />
             </com.google.android.material.card.MaterialCardView>
 
@@ -164,7 +164,6 @@ android:visibility="gone"
                 android:focusable="false"
                 app:borderWidth="0dp"
                 app:fabSize="mini"
-
                 app:srcCompat="@drawable/ic_check_circle_black_24dp"/>
         </LinearLayout>
     </LinearLayout>
@@ -177,9 +176,7 @@ android:visibility="gone"
         android:layout_margin="@dimen/fab_margin"
         app:fabSize="normal"
         app:borderWidth="0dp"
-        android:backgroundTint="#F9A342"
+        android:backgroundTint="#9143B0"
         app:srcCompat="@drawable/arrow_up_white" />
-
-
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

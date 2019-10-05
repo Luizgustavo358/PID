@@ -139,6 +139,8 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, allIntents.toArray(new Parcelable[0]));
 
         startActivityForResult(chooserIntent, IMAGE_RESULT);
+
+        button.setVisibility(view.VISIBLE);
     }
 
 
@@ -243,6 +245,8 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
                 System.out.println("NÃO EXISTE");
             }
         }
+
+        button.setVisibility(view.VISIBLE);
     }
 
     private void galleryAddPic() {
