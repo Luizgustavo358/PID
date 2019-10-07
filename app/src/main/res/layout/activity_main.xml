@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:opencv="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -14,40 +13,62 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="visible">
+            android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/imageView"
-                android:contentDescription="@string/foto"
-                android:layout_width="match_parent"
-                android:layout_height="400dp"
-                tools:srcCompat="@tools:sample/avatars" />
-
-            <Button
-                android:id="@+id/button"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/limiarizar"
-                android:visibility="invisible" />
-        </LinearLayout>
+                android:orientation="vertical"
+                android:visibility="visible">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
-            <org.opencv.android.JavaCameraView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="visible"
-                android:id="@+id/HelloOpenCvView"
-                opencv:show_fps="true"
-                opencv:camera_id="any" />
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Prova em Branco:" />
+
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="400dp"
+                    android:contentDescription="@string/foto"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <Button
+                    android:id="@+id/button2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Obter prova em branco" />
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Gabarito:" />
+
+                <ImageView
+                    android:id="@+id/imageView2"
+                    android:layout_width="match_parent"
+                    android:layout_height="400dp"
+                    android:contentDescription="@string/foto"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+                <Button
+                    android:id="@+id/button3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Obter gabarito" />
+
+                <Button
+                    android:id="@+id/button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/limiarizar"
+                    android:visibility="invisible" />
+            </LinearLayout>
+        </ScrollView>
+
     </LinearLayout>
 
     <View
@@ -56,128 +77,5 @@
         android:layout_height="match_parent"
         android:background="@color/app_background"
         android:visibility="gone" />
-
-    <LinearLayout
-        android:id="@+id/ls_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginStart="@dimen/fab_margin"
-        android:layout_marginTop="@dimen/fab_margin"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="120dp"
-        android:gravity="center_vertical|end"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:id="@+id/option1"
-            android:layout_width="wrap_content"
-            android:layout_height="55dp"
-
-            android:gravity="center_vertical|end"
-            android:orientation="horizontal">
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:text="@string/camera"
-
-                    android:textStyle="bold" />
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/branco"
-                android:clickable="false"
-                android:focusable="false"
-                app:borderWidth="0dp"
-                app:fabSize="mini"
-                app:srcCompat="@drawable/ic_camera_alt_black_24dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/option2"
-            android:layout_width="wrap_content"
-            android:layout_height="55dp"
-
-            android:gravity="center_vertical|end"
-            android:orientation="horizontal">
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:text="@string/galeria"
-
-                    android:textStyle="bold" />
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/branco"
-                android:clickable="false"
-                android:focusable="false"
-                app:borderWidth="0dp"
-                app:fabSize="mini"
-                app:srcCompat="@drawable/ic_gallery" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/option3"
-            android:layout_width="wrap_content"
-            android:layout_height="55dp"
-            android:visibility="gone"
-            android:gravity="center_vertical|end"
-            android:orientation="horizontal">
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:text="@string/gabarito"
-                    android:textStyle="bold" />
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/branco"
-                android:clickable="false"
-                android:focusable="false"
-                app:borderWidth="0dp"
-                app:fabSize="mini"
-                app:srcCompat="@drawable/ic_check_circle_black_24dp"/>
-        </LinearLayout>
-    </LinearLayout>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_photo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        app:fabSize="normal"
-        app:borderWidth="0dp"
-        android:backgroundTint="@color/colorPrimaryDark"
-        app:srcCompat="@drawable/arrow_up_white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,7 +1,9 @@
 package com.example.pid;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ComponentName;
+
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -14,24 +16,19 @@ import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
-
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
@@ -50,25 +47,30 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity implements CvCameraViewListener2 {
+@SuppressWarnings({"unused", "ConstantConditions"})
+public class MainActivity extends AppCompatActivity {
 
 
     Animation hideLayout;
     Animation hideShadow;
     Button button;
 
-    Animation showLayout;
-    Animation showShadow;
-    private FloatingActionButton fabPhoto;
-    private View shadowView;
-    private LinearLayout subFab;
-    private LinearLayout option1Layout;
-    private LinearLayout option2Layout;
+    private Bitmap bitmapProvaEmBranco;
+    private ImageView imageViewProvaEmBranco;
+    Button obterProvaBranco;
+    File fileProvaEmBranco;
+    static final int REQUEST_TAKE_PHOTO_PROVA_BRANCO = 1;
+    private final static int IMAGE_RESULT_PROVA_BRANCO = 200;
 
-    private ImageView imageView;
+    private Bitmap bitmapGabarito;
+    private ImageView imageViewGabarito;
+    Button obterGabarito;
+    File fileGabarito;
+    static final int REQUEST_TAKE_PHOTO_GABARITO = 2;
+    private final static int IMAGE_RESULT_GABARITO = 201;
 
-    private final static int IMAGE_RESULT = 200;
-    private Bitmap bitmap;
+    private RecyclerView recyclerViewProvas;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,14 +79,8 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         OpenCVLoader.initDebug();
 
         initializeViews();
-        subFab.setVisibility(View.GONE);
-        setFabAnimations();
+
         setListeners();
-
-
-        mOpenCvCameraView = findViewById(R.id.HelloOpenCvView);
-        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
-        mOpenCvCameraView.setCvCameraViewListener(this);
     }
 
 
@@ -92,27 +88,55 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
      * Set the activity listener behaviours.
      */
     private void setListeners() {
-        option1Layout.setOnClickListener(this::dispatchTakePictureIntent);
-        option2Layout.setOnClickListener(this::choosePictureFromSomewhere);
+        obterProvaBranco.setOnClickListener(v -> {
+            getAlertDialog(this::setFileProvaEmBranco, REQUEST_TAKE_PHOTO_PROVA_BRANCO, IMAGE_RESULT_PROVA_BRANCO).show();
+        });
+        obterGabarito.setOnClickListener(v -> {
+            getAlertDialog(this::setFileGabarito, REQUEST_TAKE_PHOTO_GABARITO, IMAGE_RESULT_GABARITO).show();
+        });
         button.setOnClickListener(v -> {
-            Mat mat = new Mat();
-            Bitmap bmp32 = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-            Utils.bitmapToMat(bmp32, mat);
-            Mat destination = new Mat();
-            Imgproc.cvtColor(mat, destination, Imgproc.COLOR_RGB2GRAY);
-            Utils.matToBitmap(destination, bitmap);
-            imageView.setImageBitmap(bitmap);
+            setBinary(bitmapProvaEmBranco, imageViewProvaEmBranco, setGreyScale(bitmapProvaEmBranco, imageViewProvaEmBranco));
+            setBinary(bitmapGabarito, imageViewGabarito, setGreyScale(bitmapGabarito, imageViewGabarito));
 
-            Mat destination2 = new Mat();
-            Imgproc.adaptiveThreshold(destination, destination2, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 91, 15);
-
-            Utils.matToBitmap(destination2, bitmap);
-            storeImage(bitmap);
-            imageView.setImageBitmap(bitmap);
         });
     }
 
-    private void choosePictureFromSomewhere(View view) {
+    private AlertDialog getAlertDialog(Consumer<File> setFileProvaEmBranco, int resultTakePicture, int resultChoosePicture) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.modo)
+                .setPositiveButton(R.string.camera, (dialog, id) -> {
+                    dispatchTakePictureIntent(setFileProvaEmBranco, resultTakePicture);
+                })
+                .setNegativeButton(R.string.galeria, (dialog, id) -> {
+                    choosePictureFromSomewhere(resultChoosePicture);
+                })
+                .setNeutralButton(android.R.string.cancel, (dialog, which) -> {
+                })
+                .setCancelable(true);
+// Create the AlertDialog object and return it
+        return builder.create();
+    }
+
+    private void setBinary(Bitmap bitmap, ImageView imageView, Mat destination) {
+        Mat destination2 = new Mat();
+        Imgproc.adaptiveThreshold(destination, destination2, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 7);
+        Utils.matToBitmap(destination2, bitmap);
+        storeImage(bitmap);
+        imageView.setImageBitmap(bitmap);
+    }
+
+    private Mat setGreyScale(Bitmap bitmap, ImageView imageView) {
+        Mat mat = new Mat();
+        Bitmap bmp32 = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Utils.bitmapToMat(bmp32, mat);
+        Mat destination = new Mat();
+        Imgproc.cvtColor(mat, destination, Imgproc.COLOR_RGB2GRAY);
+        Utils.matToBitmap(destination, bitmap);
+        imageView.setImageBitmap(bitmap);
+        return destination;
+    }
+
+    private void choosePictureFromSomewhere(int resultCode) {
         List<Intent> allIntents = new ArrayList<>();
         PackageManager packageManager = getPackageManager();
 
@@ -138,27 +162,63 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         Intent chooserIntent = Intent.createChooser(mainIntent, "Selecione fonte");
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, allIntents.toArray(new Parcelable[0]));
 
-        startActivityForResult(chooserIntent, IMAGE_RESULT);
 
-        button.setVisibility(view.VISIBLE);
+        startActivityForResult(chooserIntent, resultCode);
+
+
     }
 
+    public void setBitmapGabarito(Bitmap bitmapGabarito) {
+        this.bitmapGabarito = bitmapGabarito;
+    }
+
+    public void setBitmapProvaEmBranco(Bitmap bitmapProvaEmBranco) {
+        this.bitmapProvaEmBranco = bitmapProvaEmBranco;
+    }
+
+    public void setFileGabarito(File fileGabarito) {
+        this.fileGabarito = fileGabarito;
+    }
+
+    public void setFileProvaEmBranco(File fileProvaEmBranco) {
+        this.fileProvaEmBranco = fileProvaEmBranco;
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-            setPic();
-            galleryAddPic();
-        } else if (requestCode == IMAGE_RESULT && resultCode == Activity.RESULT_OK) {
+        if (requestCode == REQUEST_TAKE_PHOTO_PROVA_BRANCO && resultCode == RESULT_OK) {
+
+            setPic(imageViewProvaEmBranco, this::setBitmapProvaEmBranco, fileProvaEmBranco.getAbsolutePath());
+            galleryAddPic(fileProvaEmBranco.getAbsolutePath());
+            if (bitmapGabarito != null && bitmapProvaEmBranco != null)
+                button.setVisibility(View.VISIBLE);
+
+        } else if (requestCode == IMAGE_RESULT_PROVA_BRANCO && resultCode == Activity.RESULT_OK) {
 
             String filePath = getImageFilePath(data);
             if (filePath != null) {
-                bitmap = BitmapFactory.decodeFile(filePath);
-                imageView.setImageBitmap(bitmap);
+                bitmapProvaEmBranco = BitmapFactory.decodeFile(filePath);
+                imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
             }
+            if (bitmapGabarito != null && bitmapProvaEmBranco != null)
+            button.setVisibility(View.VISIBLE);
 
+        } else if (requestCode == REQUEST_TAKE_PHOTO_GABARITO && resultCode == RESULT_OK) {
 
+            setPic(imageViewGabarito, this::setBitmapGabarito, fileGabarito.getAbsolutePath());
+            galleryAddPic(fileGabarito.getAbsolutePath());
+            if (bitmapGabarito != null && bitmapProvaEmBranco != null)
+            button.setVisibility(View.VISIBLE);
+        } else if (requestCode == IMAGE_RESULT_GABARITO && resultCode == RESULT_OK) {
+
+            String filePath = getImageFilePath(data);
+            if (filePath != null) {
+                bitmapGabarito = BitmapFactory.decodeFile(filePath);
+                imageViewGabarito.setImageBitmap(bitmapGabarito);
+            }
+            if (bitmapGabarito != null && bitmapProvaEmBranco != null)
+            button.setVisibility(View.VISIBLE);
         }
     }
 
@@ -196,8 +256,6 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     }
 
 
-    String currentPhotoPath;
-
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
@@ -210,6 +268,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
                 "PID"
         );
         storageDir.mkdirs();
+
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -217,13 +276,13 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         );
 
         // Save a file: path for use with ACTION_VIEW intents
-        currentPhotoPath = image.getAbsolutePath();
+
         return image;
+
     }
 
-    static final int REQUEST_TAKE_PHOTO = 1;
 
-    private void dispatchTakePictureIntent(View view) {
+    private void dispatchTakePictureIntent(Consumer<File> setFile, int resultCode) {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -231,6 +290,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
             File photoFile;
             try {
                 photoFile = createImageFile();
+                setFile.accept(photoFile);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
@@ -240,25 +300,28 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
                         "com.example.android.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+
+                startActivityForResult(takePictureIntent, resultCode);
             } else {
                 System.out.println("NÃO EXISTE");
             }
         }
 
-        button.setVisibility(view.VISIBLE);
+
     }
 
-    private void galleryAddPic() {
+    private void galleryAddPic(String path) {
         Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(currentPhotoPath);
+        File f = new File(path);
         Uri contentUri = Uri.fromFile(f);
         mediaScanIntent.setData(contentUri);
         this.sendBroadcast(mediaScanIntent);
     }
 
-    /** Create a File for saving an image or video */
-    private  File getOutputMediaFile() throws IOException {
+    /**
+     * Create a File for saving an image or video
+     */
+    private File getOutputMediaFile() throws IOException {
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
         File mediaStorageDir = new File(
@@ -267,9 +330,8 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
                 ),
                 "PID"
         );
+
         mediaStorageDir.mkdirs();
-
-
 
 
         // This location works best if you want the created images to be shared
@@ -282,12 +344,14 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
 
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG" + timeStamp + "_";
-        mediaFile =File.createTempFile(
+        mediaFile = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
                 mediaStorageDir      /* directory */
         );
         return mediaFile;
+
+
     }
 
     private void storeImage(Bitmap image) {
@@ -302,7 +366,6 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
             FileOutputStream fos = new FileOutputStream(pictureFile);
             image.compress(Bitmap.CompressFormat.JPEG, 90, fos);
             fos.close();
-            System.out.println("4$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
         } catch (FileNotFoundException e) {
             Log.d(TAG, "**************** File not found: " + e.getMessage());
         } catch (IOException e) {
@@ -310,7 +373,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         }
     }
 
-    private void setPic() {
+    private void setPic(ImageView imageView, Consumer<Bitmap> setBitmap, String path) {
         // Get the dimensions of the View
         int targetW = imageView.getWidth();
         int targetH = imageView.getHeight();
@@ -330,7 +393,8 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
 
-        bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
+        Bitmap bitmap = BitmapFactory.decodeFile(path, bmOptions);
+        setBitmap.accept(bitmap);
         imageView.setImageBitmap(bitmap);
     }
 
@@ -338,170 +402,30 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
      * Initializes the views of the activity
      */
     private void initializeViews() {
-        subFab = findViewById(R.id.ls_layout);
-        shadowView = findViewById(R.id.shadowView);
-        option1Layout = findViewById(R.id.option1);
-        option2Layout = findViewById(R.id.option2);
-        fabPhoto = findViewById(R.id.fab_photo);
-        imageView = findViewById(R.id.imageView);
+
+
+        imageViewProvaEmBranco = findViewById(R.id.imageView);
+        imageViewGabarito = findViewById(R.id.imageView2);
         button = findViewById(R.id.button);
+        obterProvaBranco = findViewById(R.id.button2);
+        obterGabarito = findViewById(R.id.button3);
     }
 
-
-    /**
-     * Set Floating Action button animations.
-     */
-    private void setFabAnimations() {
-        hideLayout = AnimationUtils.loadAnimation(this, R.anim.hide_layout);
-        hideFabAnimation(hideLayout);
-        hideShadow = AnimationUtils.loadAnimation(this, R.anim.hide_shadow);
-        hideShadowAnimation(hideShadow);
-
-        showLayout = AnimationUtils.loadAnimation(this, R.anim.show_layout);
-        showShadow = AnimationUtils.loadAnimation(this, R.anim.show_shadow);
-
-        fabPhoto.setOnClickListener(toggleFab());
-
-        shadowView.setOnClickListener(setShadowViewClick());
-    }
-
-
-    /**
-     * Starts the animations when clicked on the shadow view.
-     *
-     * @return lambda with the animations started if shadowView is visible
-     */
-    private View.OnClickListener setShadowViewClick() {
-        return v -> {
-            if (shadowView.getVisibility() == View.VISIBLE) {
-                shadowView.startAnimation(hideShadow);
-                subFab.startAnimation(hideLayout);
-            }
-        };
-    }
-
-    /**
-     * Set animation listener of the fab
-     *
-     * @param hideShadow is the animation used on the shadowView
-     */
-    private void hideShadowAnimation(Animation hideShadow) {
-        hideShadow.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                shadowView.clearAnimation();
-                shadowView.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-    }
-
-
-    /**
-     * Creates an onClickListener that toggles the floating action button between being visible or not.
-     *
-     * @return a click listener view
-     */
-    private View.OnClickListener toggleFab() {
-        return v -> {
-            if (subFab.getVisibility() == View.VISIBLE) {
-                shadowView.startAnimation(hideShadow);
-                subFab.startAnimation(hideLayout);
-            } else {
-                subFab.setVisibility(View.VISIBLE);
-                shadowView.setVisibility(View.VISIBLE);
-                shadowView.startAnimation(showShadow);
-                subFab.startAnimation(showLayout);
-            }
-        };
-    }
-
-    /**
-     * Set animation listener of the fab
-     *
-     * @param hideLayout is the animation used on the shadowView
-     */
-    private void hideFabAnimation(Animation hideLayout) {
-        hideLayout.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                subFab.clearAnimation();
-                subFab.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-    }
-
-    @Override
-    public void onCameraViewStarted(int width, int height) {
-
-    }
-
-    @Override
-    public void onCameraViewStopped() {
-
-    }
-
-    @Override
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-
-        Mat src = inputFrame.gray();
-        Mat cannyEdges = new Mat();
-
-        Imgproc.Canny(src, cannyEdges, 10, 100);
-
-        return cannyEdges;
-    }
 
     private static final String TAG = "MYAPP::OPENCV";
-    private CameraBridgeViewBase mOpenCvCameraView;
+
 
     BaseLoaderCallback mCallBack = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
-            switch (status) {
-                case BaseLoaderCallback.SUCCESS:
-                    Log.i(TAG, "OpenCV loaded successfully");
-                    mOpenCvCameraView.enableView();
-                    break;
-                default:
-                    super.onManagerConnected(status);
-                    break;
+            if (status == BaseLoaderCallback.SUCCESS) {
+                Log.i(TAG, "OpenCV loaded successfully");
+            } else {
+                super.onManagerConnected(status);
             }
         }
     };
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
-    }
 
     @Override
     protected void onResume() {
