@@ -15,8 +15,16 @@ public class ImagensAdapter extends RecyclerView.Adapter<ImagensAdapter.ImagensV
     private static final int IMAGE = 0;
     private ArrayList<ImageItem> imageItems;
 
+    public ArrayList<ImageItem> getImageItems() {
+        return imageItems;
+    }
+
     public ImagensAdapter() {
         this.imageItems = new ArrayList<>();
+    }
+
+    public ImageItem last(){
+        return imageItems.isEmpty() ? null : imageItems.get(imageItems.size() - 1);
     }
 
     @NonNull

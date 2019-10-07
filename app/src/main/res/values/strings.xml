@@ -11,7 +11,7 @@
     <string name="limiarizar">Limiarizar</string>
 
     <!-- TextView -->
-    <string name="prova_respondida">Prova Respondida:</string>
+    <string name="prova_respondida">Provas Respondidas:</string>
     <string name="gabarito_txt">Gabarito:</string>
     <string name="prova_branco">Prova em Branco:</string>
 

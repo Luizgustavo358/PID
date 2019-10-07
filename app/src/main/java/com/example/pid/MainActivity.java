@@ -29,6 +29,7 @@ import org.opencv.android.BaseLoaderCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 
@@ -54,37 +55,40 @@ import java.util.Objects;
 @SuppressWarnings({"unused", "ConstantConditions"})
 public class MainActivity extends AppCompatActivity {
 
-    private LinearLayout option1Layout;
-    private LinearLayout option2Layout;
-    private LinearLayout option3Layout;
+
     private LinearLayout subFab;
 
     private View shadowView;
 
-    FloatingActionButton fabPhoto;
+    private FloatingActionButton fabPhoto;
 
-    Animation hideLayout;
-    Animation hideShadow;
-    Animation showLayout;
-    Animation showShadow;
+    private Animation hideLayout;
+    private Animation hideShadow;
+    private Animation showLayout;
+    private Animation showShadow;
 
-    Button button;
+    private Button button;
 
     private Bitmap bitmapProvaEmBranco;
     private ImageView imageViewProvaEmBranco;
-    Button obterProvaBranco;
-    File fileProvaEmBranco;
+    private File fileProvaEmBranco;
+    private LinearLayout option1Layout;
     static final int REQUEST_TAKE_PHOTO_PROVA_BRANCO = 1;
     private final static int IMAGE_RESULT_PROVA_BRANCO = 200;
 
     private Bitmap bitmapGabarito;
     private ImageView imageViewGabarito;
-    Button obterGabarito;
-    File fileGabarito;
+    private LinearLayout option2Layout;
+    private File fileGabarito;
     static final int REQUEST_TAKE_PHOTO_GABARITO = 2;
     private final static int IMAGE_RESULT_GABARITO = 201;
-
     private RecyclerView recyclerViewProvas;
+
+    private RecyclerView recyclerView;
+    private ImagensAdapter adapter;
+    private LinearLayout option3Layout;
+    private static final int RESQUEST_TAKE_PHOTO_ALUNO = 3;
+    private final static int IMAGE_RESULT_ALUNO = 202;
 
 
     @Override
@@ -214,22 +218,19 @@ public class MainActivity extends AppCompatActivity {
             getAlertDialog(this::setFileGabarito, REQUEST_TAKE_PHOTO_GABARITO, IMAGE_RESULT_GABARITO).show();
         });
 
-        // TODO
         option3Layout.setOnClickListener(v -> {
-            // getAlertDialog()
+            ImageItem item = new ImageItem();
+            adapter.getImageItems().add(item);
+            getAlertDialog(item::setFile, RESQUEST_TAKE_PHOTO_ALUNO, IMAGE_RESULT_ALUNO).show();
         });
-
-//        obterProvaBranco.setOnClickListener(v -> {
-//            getAlertDialog(this::setFileProvaEmBranco, REQUEST_TAKE_PHOTO_PROVA_BRANCO, IMAGE_RESULT_PROVA_BRANCO).show();
-//        });
-//        obterGabarito.setOnClickListener(v -> {
-//            getAlertDialog(this::setFileGabarito, REQUEST_TAKE_PHOTO_GABARITO, IMAGE_RESULT_GABARITO).show();
-//        });
 
         button.setOnClickListener(v -> {
             setBinary(bitmapProvaEmBranco, imageViewProvaEmBranco, setGreyScale(bitmapProvaEmBranco, imageViewProvaEmBranco));
             setBinary(bitmapGabarito, imageViewGabarito, setGreyScale(bitmapGabarito, imageViewGabarito));
-
+            for(ImageItem imageItem : adapter.getImageItems()){
+                setBinary(imageItem.getBitmap(), setGreyScale(imageItem.getBitmap()));
+                adapter.notifyDataSetChanged();
+            }
         });
     }
 
@@ -258,6 +259,13 @@ public class MainActivity extends AppCompatActivity {
         imageView.setImageBitmap(bitmap);
     }
 
+    private void setBinary(Bitmap bitmap, Mat destination) {
+        Mat destination2 = new Mat();
+        Imgproc.adaptiveThreshold(destination, destination2, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 7);
+        Utils.matToBitmap(destination2, bitmap);
+        storeImage(bitmap);
+    }
+
     private Mat setGreyScale(Bitmap bitmap, ImageView imageView) {
         Mat mat = new Mat();
         Bitmap bmp32 = bitmap.copy(Bitmap.Config.ARGB_8888, true);
@@ -266,6 +274,16 @@ public class MainActivity extends AppCompatActivity {
         Imgproc.cvtColor(mat, destination, Imgproc.COLOR_RGB2GRAY);
         Utils.matToBitmap(destination, bitmap);
         imageView.setImageBitmap(bitmap);
+        return destination;
+    }
+
+    private Mat setGreyScale(Bitmap bitmap) {
+        Mat mat = new Mat();
+        Bitmap bmp32 = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Utils.bitmapToMat(bmp32, mat);
+        Mat destination = new Mat();
+        Imgproc.cvtColor(mat, destination, Imgproc.COLOR_RGB2GRAY);
+        Utils.matToBitmap(destination, bitmap);
         return destination;
     }
 
@@ -352,6 +370,22 @@ public class MainActivity extends AppCompatActivity {
             }
             if (bitmapGabarito != null && bitmapProvaEmBranco != null)
             button.setVisibility(View.VISIBLE);
+        } else if(requestCode ==RESQUEST_TAKE_PHOTO_ALUNO && resultCode == RESULT_OK){
+            ImageItem last = adapter.last();
+            setPic(last::setBitmap, last.getFile().getAbsolutePath());
+            adapter.notifyDataSetChanged();
+            galleryAddPic(last.getFile().getAbsolutePath());
+            if (bitmapGabarito != null && bitmapProvaEmBranco != null)
+                button.setVisibility(View.VISIBLE);
+        }else if (requestCode == IMAGE_RESULT_ALUNO && resultCode == RESULT_OK) {
+            ImageItem last = adapter.last();
+            String filePath = getImageFilePath(data);
+            if (filePath != null) {
+                last.setBitmap(BitmapFactory.decodeFile(filePath));
+                adapter.notifyDataSetChanged();
+            }
+            if (bitmapGabarito != null && bitmapProvaEmBranco != null)
+                button.setVisibility(View.VISIBLE);
         }
     }
 
@@ -408,7 +442,6 @@ public class MainActivity extends AppCompatActivity {
                 storageDir      /* directory */
         );
 
-        // Save a file: path for use with ACTION_VIEW intents
 
         return image;
 
@@ -417,9 +450,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void dispatchTakePictureIntent(Consumer<File> setFile, int resultCode) {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
             File photoFile;
             try {
                 photoFile = createImageFile();
@@ -427,7 +458,6 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-            // Continue only if the File was successfully created
             if (photoFile != null && photoFile.exists()) {
                 Uri photoURI = FileProvider.getUriForFile(this,
                         "com.example.android.fileprovider",
@@ -455,8 +485,6 @@ public class MainActivity extends AppCompatActivity {
      * Create a File for saving an image or video
      */
     private File getOutputMediaFile() throws IOException {
-        // To be safe, you should check that the SDCard is mounted
-        // using Environment.getExternalStorageState() before doing this.
         File mediaStorageDir = new File(
                 Environment.getExternalStoragePublicDirectory(
                         Environment.DIRECTORY_PICTURES
@@ -466,13 +494,6 @@ public class MainActivity extends AppCompatActivity {
 
         mediaStorageDir.mkdirs();
 
-
-        // This location works best if you want the created images to be shared
-        // between applications and persist after your app has been uninstalled.
-
-        // Create the storage directory if it does not exist
-
-        // Create a media file name
         File mediaFile;
 
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
@@ -507,21 +528,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setPic(ImageView imageView, Consumer<Bitmap> setBitmap, String path) {
-        // Get the dimensions of the View
         int targetW = imageView.getWidth();
         int targetH = imageView.getHeight();
 
-        // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         bmOptions.inJustDecodeBounds = true;
 
         int photoW = bmOptions.outWidth;
         int photoH = bmOptions.outHeight;
 
-        // Determine how much to scale down the image
         int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
 
-        // Decode the image file into a Bitmap sized to fill the View
         bmOptions.inJustDecodeBounds = false;
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
@@ -529,6 +546,27 @@ public class MainActivity extends AppCompatActivity {
         Bitmap bitmap = BitmapFactory.decodeFile(path, bmOptions);
         setBitmap.accept(bitmap);
         imageView.setImageBitmap(bitmap);
+    }
+
+    private void setPic(Consumer<Bitmap> setBitmap, String path) {
+        int targetW = imageViewProvaEmBranco.getWidth();
+        int targetH = imageViewProvaEmBranco.getHeight();
+
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(path, bmOptions);
+        setBitmap.accept(bitmap);
+
     }
 
     /**
@@ -548,11 +586,13 @@ public class MainActivity extends AppCompatActivity {
         shadowView = findViewById(R.id.shadowView);
         imageViewProvaEmBranco = findViewById(R.id.imageView);
         imageViewGabarito = findViewById(R.id.imageView2);
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new ImagensAdapter();
+        recyclerView.setAdapter(adapter);
 
         // Button
         button = findViewById(R.id.button);
-//        obterProvaBranco = findViewById(R.id.button2);
-//        obterGabarito = findViewById(R.id.button3);
     }
 
 
