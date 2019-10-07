@@ -19,8 +19,10 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import org.opencv.android.BaseLoaderCallback;
 
@@ -29,6 +31,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
@@ -50,9 +54,20 @@ import java.util.Objects;
 @SuppressWarnings({"unused", "ConstantConditions"})
 public class MainActivity extends AppCompatActivity {
 
+    private LinearLayout option1Layout;
+    private LinearLayout option2Layout;
+    private LinearLayout option3Layout;
+    private LinearLayout subFab;
+
+    private View shadowView;
+
+    FloatingActionButton fabPhoto;
 
     Animation hideLayout;
     Animation hideShadow;
+    Animation showLayout;
+    Animation showShadow;
+
     Button button;
 
     private Bitmap bitmapProvaEmBranco;
@@ -79,8 +94,111 @@ public class MainActivity extends AppCompatActivity {
         OpenCVLoader.initDebug();
 
         initializeViews();
+        subFab.setVisibility(View.GONE);
+        setFabAnimations();
 
         setListeners();
+    }
+
+    /**
+     * Set Floating Action button animations.
+     */
+    private void setFabAnimations() {
+        hideLayout = AnimationUtils.loadAnimation(this, R.anim.hide_layout);
+        hideFabAnimation(hideLayout);
+        hideShadow = AnimationUtils.loadAnimation(this, R.anim.hide_shadow);
+        hideShadowAnimation(hideShadow);
+
+        showLayout = AnimationUtils.loadAnimation(this, R.anim.show_layout);
+        showShadow = AnimationUtils.loadAnimation(this, R.anim.show_shadow);
+
+        fabPhoto.setOnClickListener(toggleFab());
+
+        shadowView.setOnClickListener(setShadowViewClick());
+    }
+
+    /**
+     * Starts the animations when clicked on the shadow view.
+     *
+     * @return lambda with the animations started if shadowView is visible
+     */
+    private View.OnClickListener setShadowViewClick() {
+        return v -> {
+            if (shadowView.getVisibility() == View.VISIBLE) {
+                shadowView.startAnimation(hideShadow);
+                subFab.startAnimation(hideLayout);
+            }
+        };
+    }
+
+    /**
+     * Set animation listener of the fab
+     *
+     * @param hideShadow is the animation used on the shadowView
+     */
+    private void hideShadowAnimation(Animation hideShadow) {
+        hideShadow.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                shadowView.clearAnimation();
+                shadowView.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+    }
+
+
+    /**
+     * Creates an onClickListener that toggles the floating action button between being visible or not.
+     *
+     * @return a click listener view
+     */
+    private View.OnClickListener toggleFab() {
+        return v -> {
+            if (subFab.getVisibility() == View.VISIBLE) {
+                shadowView.startAnimation(hideShadow);
+                subFab.startAnimation(hideLayout);
+            } else {
+                subFab.setVisibility(View.VISIBLE);
+                shadowView.setVisibility(View.VISIBLE);
+                shadowView.startAnimation(showShadow);
+                subFab.startAnimation(showLayout);
+            }
+        };
+    }
+
+    /**
+     * Set animation listener of the fab
+     *
+     * @param hideLayout is the animation used on the shadowView
+     */
+    private void hideFabAnimation(Animation hideLayout) {
+        hideLayout.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                subFab.clearAnimation();
+                subFab.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
     }
 
 
@@ -88,12 +206,26 @@ public class MainActivity extends AppCompatActivity {
      * Set the activity listener behaviours.
      */
     private void setListeners() {
-        obterProvaBranco.setOnClickListener(v -> {
+        option1Layout.setOnClickListener(v -> {
             getAlertDialog(this::setFileProvaEmBranco, REQUEST_TAKE_PHOTO_PROVA_BRANCO, IMAGE_RESULT_PROVA_BRANCO).show();
         });
-        obterGabarito.setOnClickListener(v -> {
+
+        option2Layout.setOnClickListener(v -> {
             getAlertDialog(this::setFileGabarito, REQUEST_TAKE_PHOTO_GABARITO, IMAGE_RESULT_GABARITO).show();
         });
+
+        // TODO
+        option3Layout.setOnClickListener(v -> {
+            // getAlertDialog()
+        });
+
+//        obterProvaBranco.setOnClickListener(v -> {
+//            getAlertDialog(this::setFileProvaEmBranco, REQUEST_TAKE_PHOTO_PROVA_BRANCO, IMAGE_RESULT_PROVA_BRANCO).show();
+//        });
+//        obterGabarito.setOnClickListener(v -> {
+//            getAlertDialog(this::setFileGabarito, REQUEST_TAKE_PHOTO_GABARITO, IMAGE_RESULT_GABARITO).show();
+//        });
+
         button.setOnClickListener(v -> {
             setBinary(bitmapProvaEmBranco, imageViewProvaEmBranco, setGreyScale(bitmapProvaEmBranco, imageViewProvaEmBranco));
             setBinary(bitmapGabarito, imageViewGabarito, setGreyScale(bitmapGabarito, imageViewGabarito));
@@ -113,7 +245,8 @@ public class MainActivity extends AppCompatActivity {
                 .setNeutralButton(android.R.string.cancel, (dialog, which) -> {
                 })
                 .setCancelable(true);
-// Create the AlertDialog object and return it
+
+        // Create the AlertDialog object and return it
         return builder.create();
     }
 
@@ -402,13 +535,24 @@ public class MainActivity extends AppCompatActivity {
      * Initializes the views of the activity
      */
     private void initializeViews() {
+        // FAB
+        fabPhoto = findViewById(R.id.fab_photo);
 
+        // Linear Layout
+        subFab = findViewById(R.id.ls_layout);
+        option1Layout = findViewById(R.id.option1);
+        option2Layout = findViewById(R.id.option2);
+        option3Layout = findViewById(R.id.option3);
 
+        // View
+        shadowView = findViewById(R.id.shadowView);
         imageViewProvaEmBranco = findViewById(R.id.imageView);
         imageViewGabarito = findViewById(R.id.imageView2);
+
+        // Button
         button = findViewById(R.id.button);
-        obterProvaBranco = findViewById(R.id.button2);
-        obterGabarito = findViewById(R.id.button3);
+//        obterProvaBranco = findViewById(R.id.button2);
+//        obterGabarito = findViewById(R.id.button3);
     }
 
 

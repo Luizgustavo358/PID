@@ -1,9 +1,23 @@
 <resources>
+    <!-- nome do app -->
     <string name="app_name">PID Test</string>
+
+    <!-- FAB -->
+    <string name="obter_prova_em_branco">Obter prova em branco</string>
+    <string name="obter_gabarito">Obter gabarito</string>
+    <string name="add_prova_respondida">Adicionar Prova respondida</string>
+
+    <!-- Botoes -->
+    <string name="limiarizar">Limiarizar</string>
+
+    <!-- TextView -->
+    <string name="prova_respondida">Prova Respondida:</string>
+    <string name="gabarito_txt">Gabarito:</string>
+    <string name="prova_branco">Prova em Branco:</string>
+
     <string name="gabarito">Gabarito</string>
     <string name="galeria">Galeria</string>
     <string name="camera">Câmera</string>
-    <string name="limiarizar">Limiarizar</string>
     <string name="foto">Foto</string>
     <string name="modo">Como deseja obter a imagem?</string>
 </resources>

@@ -27,7 +27,8 @@
                     android:id="@+id/textView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Prova em Branco:" />
+                    android:textAlignment="center"
+                    android:text="@string/prova_branco" />
 
                 <ImageView
                     android:id="@+id/imageView"
@@ -36,16 +37,17 @@
                     android:contentDescription="@string/foto"
                     tools:srcCompat="@tools:sample/avatars" />
 
-                <Button
-                    android:id="@+id/button2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Obter prova em branco" />
+<!--                <Button-->
+<!--                    android:id="@+id/button2"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="Obter prova em branco" />-->
                 <TextView
                     android:id="@+id/textView2"
+                    android:textAlignment="center"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Gabarito:" />
+                    android:text="@string/gabarito_txt" />
 
                 <ImageView
                     android:id="@+id/imageView2"
@@ -54,11 +56,25 @@
                     android:contentDescription="@string/foto"
                     tools:srcCompat="@tools:sample/avatars" />
 
-                <Button
-                    android:id="@+id/button3"
+                <TextView
+                    android:id="@+id/textView3"
+                    android:textAlignment="center"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Obter gabarito" />
+                    android:text="@string/prova_respondida" />
+
+                <ImageView
+                    android:id="@+id/imageView3"
+                    android:layout_width="match_parent"
+                    android:layout_height="400dp"
+                    android:contentDescription="@string/foto"
+                    tools:srcCompat="@tools:sample/avatars" />
+
+<!--                <Button-->
+<!--                    android:id="@+id/button3"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="Obter gabarito" />-->
 
                 <Button
                     android:id="@+id/button"
@@ -77,5 +93,126 @@
         android:layout_height="match_parent"
         android:background="@color/app_background"
         android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/ls_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginStart="@dimen/fab_margin"
+        android:layout_marginTop="@dimen/fab_margin"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="120dp"
+        android:gravity="center_vertical|end"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/option1"
+            android:layout_width="wrap_content"
+            android:layout_height="55dp"
+
+            android:gravity="center_vertical|end"
+            android:orientation="horizontal">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:text="@string/obter_prova_em_branco"
+                    android:textStyle="bold" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/branco"
+                android:clickable="false"
+                android:focusable="false"
+                app:borderWidth="0dp"
+                app:fabSize="mini"
+                app:srcCompat="@drawable/ic_insert_drive_file_black_24dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/option2"
+            android:layout_width="wrap_content"
+            android:layout_height="55dp"
+
+            android:gravity="center_vertical|end"
+            android:orientation="horizontal">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:text="@string/obter_gabarito"
+
+                    android:textStyle="bold" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/branco"
+                android:clickable="false"
+                android:focusable="false"
+                app:borderWidth="0dp"
+                app:fabSize="mini"
+                app:srcCompat="@drawable/ic_check_circle_black_24dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/option3"
+            android:layout_width="wrap_content"
+            android:layout_height="55dp"
+
+            android:gravity="center_vertical|end"
+            android:orientation="horizontal">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:text="@string/add_prova_respondida"
+                    android:textStyle="bold" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/branco"
+                android:clickable="false"
+                android:focusable="false"
+                app:borderWidth="0dp"
+                app:fabSize="mini"
+                app:srcCompat="@drawable/ic_assignment_black_24dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_photo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        app:fabSize="normal"
+        app:borderWidth="0dp"
+        android:backgroundTint="@color/colorPrimaryDark"
+        app:srcCompat="@drawable/arrow_up_white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
