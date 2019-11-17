@@ -10,9 +10,9 @@ utilizando processamento de imagem.
 Alexei
 
 ### Grupo:
-- Álefe
-- Luiz Gustavo
-- Rubens
+- [Álefe](https://github.com/AlefeLucas)
+- [Luiz Gustavo](https://github.com/Luizgustavo358)
+- [Rubens](https://github.com/rubenscmb)
 
 O que usamos:
 ---
