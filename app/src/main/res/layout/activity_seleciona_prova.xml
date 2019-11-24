@@ -144,7 +144,8 @@
                 android:id="@+id/btnRecomecar"
                 android:layout_width="315dp"
                 android:layout_height="wrap_content"
-                android:text="Começar de novo" />
+                android:text="Começar de novo"
+                android:onClick="telaInicial" />
 
             <Space
                 android:layout_width="87dp"
