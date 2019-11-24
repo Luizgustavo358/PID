@@ -31,7 +31,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
 
-
+        <!-- Primeira Tela - Inicial -->
         <activity
             android:name=".TelaInicial"
             android:screenOrientation="portrait">
@@ -41,6 +41,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Segunda Tela - Prova em Branco -->
+        <activity android:name=".SelecionaProva"></activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"
