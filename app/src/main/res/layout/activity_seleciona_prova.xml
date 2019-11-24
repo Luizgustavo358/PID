@@ -56,7 +56,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="97dp"
                 android:layout_weight="1"
-                android:background="@drawable/ic_camera_alt_black_24dp" />
+                android:background="@drawable/ic_camera_alt_black_24dp"
+                android:onClick="telaLinearizaProva" />
 
             <Space
                 android:layout_width="33dp"
@@ -73,7 +74,7 @@
 
             <Space
                 android:layout_width="41dp"
-                android:layout_height="96dp"
+                android:layout_height="97dp"
                 android:layout_weight="1" />
 
         </LinearLayout>
@@ -84,19 +85,19 @@
             android:orientation="horizontal">
 
             <Space
-                android:layout_width="26dp"
+                android:layout_width="41dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1" />
 
             <TextView
                 android:id="@+id/textView8"
-                android:layout_width="113dp"
+                android:layout_width="81dp"
                 android:layout_height="wrap_content"
                 android:text="Câmera"
                 android:textAlignment="center" />
 
             <Space
-                android:layout_width="18dp"
+                android:layout_width="77dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1" />
 
@@ -109,7 +110,7 @@
                 android:textAlignment="center" />
 
             <Space
-                android:layout_width="29dp"
+                android:layout_width="41dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1" />
         </LinearLayout>

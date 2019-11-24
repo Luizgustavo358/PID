@@ -27,4 +27,9 @@ public class SelecionaProva extends AppCompatActivity {
         Intent intent = new Intent(this, TelaInicial.class);
         startActivity(intent);
     }
+
+    public void telaLinearizaProva(View view) {
+        Intent intent = new Intent(this, LinearizarProvaEmBranco.class);
+        startActivity(intent);
+    }
 }

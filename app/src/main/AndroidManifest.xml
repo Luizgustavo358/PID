@@ -30,7 +30,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-
+        <activity android:name=".LinearizarProvaEmBranco"></activity>
         <!-- Primeira Tela - Inicial -->
         <activity
             android:name=".TelaInicial"
@@ -40,10 +40,8 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Segunda Tela - Prova em Branco -->
-        <activity android:name=".SelecionaProva"></activity>
+        </activity> <!-- Segunda Tela - Prova em Branco -->
+        <activity android:name=".SelecionaProva" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
