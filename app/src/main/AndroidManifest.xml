@@ -30,8 +30,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".LinearizarProvaEmBranco"></activity>
-        <!-- Primeira Tela - Inicial -->
+        <activity android:name=".SelecionaGabarito"></activity>
+        <activity android:name=".LinearizarProvaEmBranco" /> <!-- Primeira Tela - Inicial -->
         <activity
             android:name=".TelaInicial"
             android:screenOrientation="portrait">
