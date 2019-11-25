@@ -43,76 +43,26 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="97dp"
+            android:layout_height="141dp"
             android:orientation="horizontal">
 
             <Space
                 android:layout_width="41dp"
-                android:layout_height="97dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1" />
 
             <Button
                 android:id="@+id/btnFotoProvaEmBranco"
                 android:layout_width="wrap_content"
-                android:layout_height="97dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/ic_camera_alt_black_24dp"
-                android:onClick="telaLinearizaProva" />
-
-            <Space
-                android:layout_width="33dp"
-                android:layout_height="96dp"
-                android:layout_weight="1" />
-
-            <Button
-                android:id="@+id/btnGaleriaProvaEmBranco"
-                android:layout_width="wrap_content"
-                android:layout_height="93dp"
-                android:layout_weight="1"
-                android:background="@drawable/ic_gallery"
-                android:contentDescription="123" />
-
-            <Space
-                android:layout_width="41dp"
-                android:layout_height="97dp"
-                android:layout_weight="1" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+                android:background="@drawable/ic_camera_alt_black_24dp" />
 
             <Space
                 android:layout_width="41dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1" />
 
-            <TextView
-                android:id="@+id/textView8"
-                android:layout_width="81dp"
-                android:layout_height="wrap_content"
-                android:text="Câmera"
-                android:textAlignment="center" />
-
-            <Space
-                android:layout_width="77dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
-
-            <TextView
-                android:id="@+id/textView9"
-                android:layout_width="69dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/galeria"
-                android:textAlignment="center" />
-
-            <Space
-                android:layout_width="41dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1" />
         </LinearLayout>
 
         <Space

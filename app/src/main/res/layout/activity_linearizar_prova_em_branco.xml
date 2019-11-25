@@ -42,6 +42,16 @@
 
         <Space
             android:layout_width="match_parent"
+            android:layout_height="30dp" />
+
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="invisible" />
+
+        <Space
+            android:layout_width="match_parent"
             android:layout_height="73dp" />
 
         <LinearLayout
