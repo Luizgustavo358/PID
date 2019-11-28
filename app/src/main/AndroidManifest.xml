@@ -51,8 +51,11 @@
         <!-- Quarta Tela - Gabarito -->
         <activity android:name=".SelecionaGabarito" />
 
-        <!-- Quinta Tela -  -->
-        <activity android:name=".ProvaDoAluno"></activity>
+        <!-- Quinta Tela - Lineariza Gabarito -->
+        <activity android:name=".LinearizaGabarito"></activity>
+
+        <!-- Quinta Tela - Prova Aluno -->
+        <activity android:name=".ProvaDoAluno" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
