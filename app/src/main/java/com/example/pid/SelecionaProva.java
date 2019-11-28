@@ -27,7 +27,7 @@ import java.util.Objects;
 
 public class SelecionaProva extends AppCompatActivity {
     // variaveis globais
-    Button btnCamera;
+    Button btnCamera, btnTiraFoto;
     private File fileProvaEmBranco;
     static final int REQUEST_TAKE_PHOTO_PROVA_BRANCO = 1;
     private final static int IMAGE_RESULT_PROVA_BRANCO = 200;
@@ -49,10 +49,11 @@ public class SelecionaProva extends AppCompatActivity {
       */
     private void initializeViews() {
         btnCamera = findViewById(R.id.btnFotoProvaEmBranco);
+        btnTiraFoto = findViewById(R.id.btnTirarFoto);
     }
 
     public void setListeners() {
-        btnCamera.setOnClickListener(v -> {
+        btnTiraFoto.setOnClickListener(v -> {
             getAlertDialog(this::setFileProvaEmBranco, REQUEST_TAKE_PHOTO_PROVA_BRANCO, IMAGE_RESULT_PROVA_BRANCO).show();
         });
     }
