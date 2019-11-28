@@ -30,8 +30,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".SelecionaGabarito"></activity>
-        <activity android:name=".LinearizarProvaEmBranco" /> <!-- Primeira Tela - Inicial -->
+
+        <!-- Primeira Tela - Inicial -->
         <activity
             android:name=".TelaInicial"
             android:screenOrientation="portrait">
@@ -40,8 +40,19 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- Segunda Tela - Prova em Branco -->
+        </activity>
+
+        <!-- Segunda Tela - Prova em Branco -->
         <activity android:name=".SelecionaProva" />
+
+        <!-- Terceira Tela - Linearizar Prova em Branco -->
+        <activity android:name=".LinearizarProvaEmBranco" />
+
+        <!-- Quarta Tela - Gabarito -->
+        <activity android:name=".SelecionaGabarito" />
+
+        <!-- Quinta Tela -  -->
+        <activity android:name=".ProvaDoAluno"></activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"
