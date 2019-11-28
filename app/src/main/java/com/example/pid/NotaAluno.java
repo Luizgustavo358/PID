@@ -6,23 +6,27 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-public class LinearizarProvaEmBranco extends AppCompatActivity {
+public class NotaAluno extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_linearizar_prova_em_branco);
+        setContentView(R.layout.activity_nota);
 
         Intent intent = getIntent();
     }
 
-    public void selecionarProvaEmBranco(View view) {
-        Intent intent = new Intent(this, SelecionaProva.class);
+    /**
+     * Volta para tela inicial.
+     * @param view
+     */
+    public void telaInicial(View view) {
+        Intent intent = new Intent(this, TelaInicial.class);
         startActivity(intent);
     }
 
-    public void selecionaGabarito(View view) {
-        Intent intent = new Intent(this, SelecionaGabarito.class);
+    public void proximaProva(View view) {
+        Intent intent = new Intent(this, ProvaDoAluno.class);
         startActivity(intent);
     }
 }

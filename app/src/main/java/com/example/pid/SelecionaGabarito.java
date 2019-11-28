@@ -12,6 +12,8 @@ public class SelecionaGabarito extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_seleciona_gabarito);
+
+        Intent intent = getIntent();
     }
 
     /**
@@ -20,6 +22,11 @@ public class SelecionaGabarito extends AppCompatActivity {
      */
     public void telaInicial(View view) {
         Intent intent = new Intent(this, TelaInicial.class);
+        startActivity(intent);
+    }
+
+    public void linearizaGabarito(View view) {
+        Intent intent = new Intent(this, LinearizaGabarito.class);
         startActivity(intent);
     }
 }

@@ -58,7 +58,10 @@
         <activity android:name=".ProvaDoAluno" />
 
         <!-- Sexta Tela - Lineariza Prova Aluno -->
-        <activity android:name=".LinearizaProvaAluno"></activity>
+        <activity android:name=".LinearizaProvaAluno" />
+
+        <!-- Setima Tela - Nota do Aluno -->
+        <activity android:name=".NotaAluno"></activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"

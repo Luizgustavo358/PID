@@ -12,10 +12,17 @@ public class LinearizaProvaAluno extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lineariza_prova_aluno);
+
+        Intent intent = getIntent();
     }
 
     public void tiraFotoProvaAluno(View view) {
-        Intent intent = new Intent(this, SelecionaGabarito.class);
+        Intent intent = new Intent(this, ProvaDoAluno.class);
+        startActivity(intent);
+    }
+
+    public void calculaNota(View view) {
+        Intent intent = new Intent(this, NotaAluno.class);
         startActivity(intent);
     }
 }

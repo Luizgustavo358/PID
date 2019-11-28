@@ -36,6 +36,7 @@
 
     <Button
         android:id="@+id/btnFotoProvaEmBranco"
+        android:onClick="linearizaProvaAluno"
         android:layout_width="87dp"
         android:layout_height="86dp"
         android:layout_marginStart="8dp"

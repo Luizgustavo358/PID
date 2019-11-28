@@ -12,6 +12,8 @@ public class ProvaDoAluno extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_prova_do_aluno);
+
+        Intent intent = getIntent();
     }
 
     /**
@@ -20,6 +22,14 @@ public class ProvaDoAluno extends AppCompatActivity {
      */
     public void telaInicial(View view) {
         Intent intent = new Intent(this, TelaInicial.class);
+        startActivity(intent);
+    }
+
+    /**
+     * @param view
+     */
+    public void linearizaProvaAluno(View view) {
+        Intent intent = new Intent(this, LinearizaProvaAluno.class);
         startActivity(intent);
     }
 }
