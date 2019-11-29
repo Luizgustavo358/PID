@@ -43,7 +43,25 @@
         </activity>
 
         <!-- Segunda Tela - Prova em Branco -->
-        <activity android:name=".SelecionaProva"></activity>
+        <activity android:name=".SelecionaProva" />
+
+        <!-- Terceira Tela - Linearizar Prova em Branco -->
+        <activity android:name=".LinearizarProvaEmBranco" />
+
+        <!-- Quarta Tela - Gabarito -->
+        <activity android:name=".SelecionaGabarito" />
+
+        <!-- Quinta Tela - Lineariza Gabarito -->
+        <activity android:name=".LinearizaGabarito" />
+
+        <!-- Quinta Tela - Prova Aluno -->
+        <activity android:name=".ProvaDoAluno" />
+
+        <!-- Sexta Tela - Lineariza Prova Aluno -->
+        <activity android:name=".LinearizaProvaAluno" />
+
+        <!-- Setima Tela - Nota do Aluno -->
+        <activity android:name=".NotaAluno"></activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"
