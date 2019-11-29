@@ -24,6 +24,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
 
@@ -403,6 +404,8 @@ public class MainActivity extends AppCompatActivity {
 
 
                 storeImage(bitmapProvaEmBranco);
+            } else {
+                Toast.makeText(this, "Folha não identificada", Toast.LENGTH_LONG).show();
             }
 
 
