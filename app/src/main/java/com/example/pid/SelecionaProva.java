@@ -37,7 +37,7 @@ import java.util.Objects;
 
 public class SelecionaProva extends AppCompatActivity {
     // variaveis globais
-    Button btnCamera, btnTiraFoto, limiariza;
+    Button btnTiraFoto, limiariza;
     private File fileProvaEmBranco;
     static final int REQUEST_TAKE_PHOTO_PROVA_BRANCO = 1;
     private final static int IMAGE_RESULT_PROVA_BRANCO = 200;
@@ -60,7 +60,6 @@ public class SelecionaProva extends AppCompatActivity {
       * Initializes the views of the activity
       */
     private void initializeViews() {
-        btnCamera = findViewById(R.id.btnFotoProvaEmBranco);
         btnTiraFoto = findViewById(R.id.btnTirarFoto);
         limiariza = findViewById(R.id.btnLimiarizar);
         imageViewProvaEmBranco = findViewById(R.id.imgFoto);
