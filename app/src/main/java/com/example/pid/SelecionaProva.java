@@ -20,16 +20,28 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.calib3d.Calib3d;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfInt;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,12 +52,13 @@ import java.util.Objects;
 
 public class SelecionaProva extends AppCompatActivity {
     // variaveis globais
-    Button btnTiraFoto, btnTonsDeCinza;
+    Button btnTiraFoto, btnTonsDeCinza, btnRedimensionar, btnLimiarizar;
     private File fileProvaEmBranco;
     static final int REQUEST_TAKE_PHOTO_PROVA_BRANCO = 1;
     private final static int IMAGE_RESULT_PROVA_BRANCO = 200;
     private Bitmap bitmapProvaEmBranco;
     private ImageView imageViewProvaEmBranco;
+    private final static int THRESHOLD = 30;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,12 +79,246 @@ public class SelecionaProva extends AppCompatActivity {
         btnTiraFoto = findViewById(R.id.btnTirarFoto);
         btnTonsDeCinza = findViewById(R.id.btnTonsDeCinza);
         imageViewProvaEmBranco = findViewById(R.id.imgFoto);
+        btnRedimensionar = findViewById(R.id.btnRedimensionar);
+        btnLimiarizar = findViewById(R.id.btnLimiarizar);
     }
 
     public void setListeners() {
         btnTiraFoto.setOnClickListener(v -> {
             getAlertDialog(this::setFileProvaEmBranco, REQUEST_TAKE_PHOTO_PROVA_BRANCO, IMAGE_RESULT_PROVA_BRANCO).show();
         });
+
+        btnTonsDeCinza.setOnClickListener(v -> {
+            setGreyScale(bitmapProvaEmBranco, imageViewProvaEmBranco);
+            btnTonsDeCinza.setVisibility(View.GONE);
+            btnRedimensionar.setVisibility(View.VISIBLE);
+        });
+
+        btnRedimensionar.setOnClickListener(v -> {
+            Mat a = new Mat();
+            Bitmap bmp32 = bitmapProvaEmBranco.copy(Bitmap.Config.ARGB_8888, true);
+            Utils.bitmapToMat(bmp32, a);
+
+            MatOfPoint2f finalCorners = getCorners(a);
+            if (finalCorners.toArray().length == 4) {
+                Mat result = warpPerspective(a, finalCorners);
+
+                Utils.matToBitmap(result, bitmapProvaEmBranco);
+
+                imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
+                btnRedimensionar.setVisibility(View.GONE);
+                btnLimiarizar.setVisibility(View.VISIBLE);
+
+                storeImage(bitmapProvaEmBranco);
+
+            } else {
+                System.out.println("ERROR");
+                Toast.makeText(this, "Folha não identificada - primeira foto", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+
+    private static double getDistance(Point p1, Point p2) {
+        double dx = p2.x - p1.x;
+        double dy = p2.y - p1.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    /**
+     * Create a File for saving an image or video
+     */
+    private File getOutputMediaFile() throws IOException {
+        File mediaStorageDir = new File(
+                Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_PICTURES
+                ),
+                "PID"
+        );
+
+        mediaStorageDir.mkdirs();
+
+        File mediaFile;
+
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG" + timeStamp + "_";
+        mediaFile = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                mediaStorageDir      /* directory */
+        );
+        return mediaFile;
+
+
+    }
+
+    private void storeImage(Bitmap image) {
+
+        try {
+            File pictureFile = getOutputMediaFile();
+            if (pictureFile == null) {
+                System.out.println("******************* Error creating media file, check storage permissions: ");// e.getMessage());
+                return;
+            }
+            FileOutputStream fos = new FileOutputStream(pictureFile);
+            image.compress(Bitmap.CompressFormat.JPEG, 90, fos);
+            fos.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("**************** File not found: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("**************** Error accessing file: " + e.getMessage());
+        }
+    }
+
+
+    private static Size getRectangleSize(MatOfPoint2f rectangle) {
+        Point[] corners = rectangle.toArray();
+
+        double top = getDistance(corners[0], corners[1]);
+        double right = getDistance(corners[1], corners[2]);
+        double bottom = getDistance(corners[2], corners[3]);
+        double left = getDistance(corners[3], corners[0]);
+
+        double averageWidth = (top + bottom) / 2f;
+        double averageHeight = (right + left) / 2f;
+
+        return new Size(new Point(averageWidth, averageHeight));
+    }
+
+    private Mat warpPerspective(Mat mat, MatOfPoint2f finalCorners) {
+        Size size = getRectangleSize(finalCorners);
+        Mat result = Mat.zeros(size, mat.type());
+        // STEP 10: Homography: Use findHomography to find the affine transformation of your paper sheet
+        Mat homography;
+        MatOfPoint2f dstPoints = new MatOfPoint2f();
+        Point[] arrDstPoints = {new Point(result.cols(), result.rows()), new Point(0, result.rows()), new Point(0, 0), new Point(result.cols(), 0)};
+        dstPoints.fromArray(arrDstPoints);
+        homography = Calib3d.findHomography(finalCorners, dstPoints);
+
+        // STEP 11: Warp the input image using the computed homography matrix
+        Imgproc.warpPerspective(mat, result, homography, size);
+
+        Size out = new Size(bitmapProvaEmBranco.getWidth(), bitmapProvaEmBranco.getHeight());
+        Imgproc.resize(result, result, out);
+        return result;
+    }
+
+    private MatOfPoint2f getCorners(Mat mat) {
+        final double DOWNSCALE_IMAGE_SIZE = 1000;
+        // STEP 1: Resize input image to img_proc to reduce computation
+        double ratio = DOWNSCALE_IMAGE_SIZE / Math.max(mat.width(), mat.height());
+        Size downscaledSize = new Size(mat.width() * ratio, mat.height() * ratio);
+        Mat dst = new Mat(downscaledSize, mat.type());
+        Imgproc.resize(mat, dst, downscaledSize);
+        Mat grayImage = new Mat();
+        Mat detectedEdges = new Mat();
+
+        // STEP 2: convert to grayscale
+        Imgproc.cvtColor(dst, grayImage, Imgproc.COLOR_BGR2GRAY);
+
+        // STEP 3: try to filter text inside document
+        Imgproc.medianBlur(grayImage, detectedEdges, 9);
+
+        // STEP 4: Edge detection
+        Mat edges = new Mat();
+        // Imgproc.erode(edges, edges, new Mat());
+        // Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
+        // canny detector, with ratio of lower:upper threshold of 3:1
+        Imgproc.Canny(detectedEdges, edges, THRESHOLD, THRESHOLD * 3, 3, true);
+
+        // STEP 5: makes the object in white bigger to join nearby lines
+        Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
+
+
+        //Utils.matToBitmap(edges, bitmapProvaEmBranco);
+        //imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
+        //Image imageToShow = Utils.mat2Image(edges);
+        //updateImageView(cannyFrame, imageToShow);
+
+        // STEP 6: Compute the contours
+        List<MatOfPoint> contours = new ArrayList<>();
+        Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+        // STEP 7: Sort the contours by length and only keep the largest one
+        for (int i = 0; i < contours.size(); i++) {
+            MatOfPoint matOfPoint = contours.get(i);
+
+        }
+        MatOfPoint largestContour = getMaxContour(contours);
+
+        // STEP 8: Generate the convex hull of this contour
+        Mat convexHullMask = Mat.zeros(mat.rows(), mat.cols(), mat.type());
+        MatOfInt hullInt = new MatOfInt();
+        Imgproc.convexHull(largestContour, hullInt);
+        MatOfPoint hullPoint = getNewContourFromIndices(largestContour, hullInt);
+
+        // STEP 9: Use approxPolyDP to simplify the convex hull (this should give a quadrilateral)
+        MatOfPoint2f polygon = new MatOfPoint2f();
+        Imgproc.approxPolyDP(convert(hullPoint), polygon, 20, true);
+        List<MatOfPoint> tmp = new ArrayList<>();
+        tmp.add(convert(polygon));
+        restoreScaleMatOfPoint(tmp, ratio);
+        Imgproc.drawContours(convexHullMask, tmp, 0, new Scalar(25, 25, 255), 2);
+        // Image extractImageToShow = Utils.mat2Image(convexHullMask);
+        // updateImageView(extractFrame, extractImageToShow);
+        MatOfPoint2f finalCorners = new MatOfPoint2f();
+        Point[] tmpPoints = polygon.toArray();
+        for (Point point : tmpPoints) {
+            point.x = point.x / ratio;
+            point.y = point.y / ratio;
+        }
+        finalCorners.fromArray(tmpPoints);
+        boolean clockwise = true;
+        double currentThreshold = THRESHOLD;
+        return finalCorners;
+    }
+
+    private static MatOfPoint getMaxContour(List<MatOfPoint> contours) {
+        double maxVal = 0;
+        MatOfPoint largestContour = null;
+        for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++) {
+            double contourArea = Imgproc.contourArea(contours.get(contourIdx));
+            if (maxVal < contourArea) {
+                maxVal = contourArea;
+                largestContour = contours.get(contourIdx);
+            }
+        }
+        return largestContour;
+    }
+
+
+    /**
+     * Creates a new simplified contour from an original contour by extracting points defined by their indices in the original contour
+     *
+     * @param origContour The original contour
+     * @param indices     Indices of points to extract
+     */
+    public static MatOfPoint getNewContourFromIndices(MatOfPoint origContour, MatOfInt indices) {
+        int height = (int) indices.size().height;
+        MatOfPoint2f newContour = new MatOfPoint2f();
+        newContour.create(height, 1, CvType.CV_32FC2);
+        for (int i = 0; i < height; ++i) {
+            int index = (int) indices.get(i, 0)[0];
+            double[] point = new double[]{
+                    origContour.get(index, 0)[0],
+                    origContour.get(index, 0)[1]
+            };
+            newContour.put(i, 0, point);
+        }
+        return convert(newContour);
+    }
+
+    /**
+     * Converts from MatOfPoint to MatOfPoint2f and vice versa
+     *
+     * @param mat Input Mat
+     * @return Converted Mat
+     */
+    public static MatOfPoint2f convert(MatOfPoint mat) {
+        return new MatOfPoint2f(mat.toArray());
+    }
+
+    public static MatOfPoint convert(MatOfPoint2f mat) {
+        return new MatOfPoint(mat.toArray());
     }
 
     public void setFileProvaEmBranco(File fileProvaEmBranco) {
@@ -93,6 +340,17 @@ public class SelecionaProva extends AppCompatActivity {
 
         // Create the AlertDialog object and return it
         return builder.create();
+    }
+
+
+
+    private static void restoreScaleMatOfPoint(List<MatOfPoint> tmp, double ratio) {
+        for (MatOfPoint matOfPoint : tmp) {
+            for (Point point : matOfPoint.toList()) {
+                point.x = point.x / ratio;
+                point.y = point.y / ratio;
+            }
+        }
     }
 
     private void dispatchTakePictureIntent(Consumer<File> setFile, int resultCode) {

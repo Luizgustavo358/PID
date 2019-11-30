@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
+import org.opencv.android.OpenCVLoader;
+
 import java.io.File;
 
 public class TelaInicial extends AppCompatActivity {
@@ -19,6 +21,7 @@ public class TelaInicial extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tela_inicial);
+        OpenCVLoader.initDebug();
     }
 
     public void provaEmBranco(View view) {
