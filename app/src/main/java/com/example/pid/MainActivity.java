@@ -10,6 +10,8 @@ import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
@@ -73,6 +75,7 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
 
 
+    public static final int THRESHOLD = 30;
     private LinearLayout subFab;
 
     private View shadowView;
@@ -335,6 +338,7 @@ public class MainActivity extends AppCompatActivity {
 
                 storeImage(bitmapProvaEmBranco);
             } else {
+                System.out.println("ERROR");
                 Toast.makeText(this, "Folha não identificada - primeira foto", Toast.LENGTH_LONG).show();
             }
 
@@ -370,7 +374,6 @@ public class MainActivity extends AppCompatActivity {
             Imgproc.dilate(r, r, element);
 
 
-
             this.bitmap4 = convertMatToBitMap(r);
             imageView4.setImageBitmap(bitmap4);
 
@@ -379,7 +382,7 @@ public class MainActivity extends AppCompatActivity {
             Mat hierarchy = new Mat();
             Imgproc.findContours(r, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
-            Toast.makeText(this, "COUNTOURS : " +contours.size(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "COUNTOURS : " + contours.size(), Toast.LENGTH_LONG).show();
 
 
             //Mat branco = setBinary(bitmapProvaEmBranco, imageViewProvaEmBranco, setGreyScale(bitmapProvaEmBranco, imageViewProvaEmBranco));
@@ -444,10 +447,14 @@ public class MainActivity extends AppCompatActivity {
         // Imgproc.erode(edges, edges, new Mat());
         // Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
         // canny detector, with ratio of lower:upper threshold of 3:1
-        Imgproc.Canny(detectedEdges, edges, 30, 30 * 3, 3, true);
+        Imgproc.Canny(detectedEdges, edges, THRESHOLD, THRESHOLD * 3, 3, true);
 
         // STEP 5: makes the object in white bigger to join nearby lines
         Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
+
+        this.bitmap4 = convertMatToBitMap(edges);
+        imageView4.setImageBitmap(bitmap4);
+        System.out.println("SET OWO");
 
         //Utils.matToBitmap(edges, bitmapProvaEmBranco);
         //imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
@@ -456,7 +463,7 @@ public class MainActivity extends AppCompatActivity {
 
         // STEP 6: Compute the contours
         List<MatOfPoint> contours = new ArrayList<>();
-        Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
         // STEP 7: Sort the contours by length and only keep the largest one
         for (int i = 0; i < contours.size(); i++) {
             MatOfPoint matOfPoint = contours.get(i);
@@ -487,7 +494,7 @@ public class MainActivity extends AppCompatActivity {
         }
         finalCorners.fromArray(tmpPoints);
         boolean clockwise = true;
-        double currentThreshold = 30;
+        double currentThreshold = THRESHOLD;
         return finalCorners;
     }
 
@@ -625,7 +632,7 @@ public class MainActivity extends AppCompatActivity {
     private Mat setBinary(Bitmap bitmap, ImageView imageView, Mat destination) {
         Mat destination2 = new Mat();
         //Imgproc.adaptiveThreshold(destination, destination2, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 7);
-        Imgproc.threshold(destination, destination2, 95, 255, Imgproc.THRESH_BINARY);
+        Imgproc.threshold(destination, destination2, 170, 255, Imgproc.THRESH_BINARY);
         Utils.matToBitmap(destination2, bitmap);
         storeImage(bitmap);
         imageView.setImageBitmap(bitmap);
@@ -725,6 +732,22 @@ public class MainActivity extends AppCompatActivity {
             String filePath = getImageFilePath(data);
             if (filePath != null) {
                 bitmapProvaEmBranco = BitmapFactory.decodeFile(filePath);
+                try {
+                    ExifInterface exif = new ExifInterface(filePath);
+                    int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+
+                    Toast.makeText(this, "Branco Orientation: " + orientation, Toast.LENGTH_LONG).show();
+
+                    if (orientation == 6) {
+                        Matrix matrix = new Matrix();
+                        matrix.postRotate(90);
+                        bitmapProvaEmBranco = Bitmap.createBitmap(bitmapProvaEmBranco, 0, 0, bitmapProvaEmBranco.getWidth(), bitmapProvaEmBranco.getHeight(), matrix, true);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
                 imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
             }
             if (bitmapGabarito != null && bitmapProvaEmBranco != null)
@@ -741,6 +764,22 @@ public class MainActivity extends AppCompatActivity {
             String filePath = getImageFilePath(data);
             if (filePath != null) {
                 bitmapGabarito = BitmapFactory.decodeFile(filePath);
+
+                try {
+                    ExifInterface exif = new ExifInterface(filePath);
+                    int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+
+                    Toast.makeText(this, "Gabarito Orientation: " + orientation, Toast.LENGTH_LONG).show();
+
+                    if (orientation == 6) {
+                        Matrix matrix = new Matrix();
+                        matrix.postRotate(90);
+                        bitmapGabarito = Bitmap.createBitmap(bitmapGabarito, 0, 0, bitmapGabarito.getWidth(), bitmapGabarito.getHeight(), matrix, true);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
                 imageViewGabarito.setImageBitmap(bitmapGabarito);
             }
             if (bitmapGabarito != null && bitmapProvaEmBranco != null)
