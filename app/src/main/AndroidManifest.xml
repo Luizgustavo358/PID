@@ -34,7 +34,7 @@
 
 
         <activity
-            android:name=".TelaInicial"
+            android:name=".TelaInicialActivity"
             android:label="Inicial"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -57,10 +57,10 @@
         </activity>
 
         <!-- Segunda Tela - Prova em Branco -->
-        <activity android:name=".SelecionaProva" />
+        <activity android:name=".SelecionaProvaActivity" />
 
         <!-- Terceira Tela - Linearizar Prova em Branco -->
-        <activity android:name=".LinearizarProvaEmBranco" />
+        <activity android:name=".LimiarizarActivity" />
 
         <!-- Quarta Tela - Gabarito -->
         <activity android:name=".SelecionaGabarito" />

@@ -20,13 +20,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
@@ -50,15 +49,18 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class SelecionaProva extends AppCompatActivity {
+public class SelecionaProvaActivity extends AppCompatActivity {
     // variaveis globais
     Button btnTiraFoto, btnTonsDeCinza, btnRedimensionar, btnLimiarizar;
-    private File fileProvaEmBranco;
+    private File file;
     static final int REQUEST_TAKE_PHOTO_PROVA_BRANCO = 1;
     private final static int IMAGE_RESULT_PROVA_BRANCO = 200;
-    private Bitmap bitmapProvaEmBranco;
-    private ImageView imageViewProvaEmBranco;
+    private Bitmap bitmapProva;
+    private ImageView imageViewProva;
     private final static int THRESHOLD = 30;
+    private TextView titleTextView;
+    private TipoProva tipoProva;
+    private File[] files;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +68,13 @@ public class SelecionaProva extends AppCompatActivity {
         setContentView(R.layout.activity_seleciona_prova);
 
         Intent intent = getIntent();
+        String title = intent.getStringExtra("TITLE");
+        tipoProva = (TipoProva) intent.getSerializableExtra("TIPO_PROVA");
+        files = (File[]) intent.getSerializableExtra("FILE");
 
         initializeViews();
+
+        titleTextView.setText(title);
 
         setListeners();
     }
@@ -76,41 +83,42 @@ public class SelecionaProva extends AppCompatActivity {
       * Initializes the views of the activity
       */
     private void initializeViews() {
+        titleTextView = findViewById(R.id.title);
         btnTiraFoto = findViewById(R.id.btnTirarFoto);
         btnTonsDeCinza = findViewById(R.id.btnTonsDeCinza);
-        imageViewProvaEmBranco = findViewById(R.id.imgFoto);
+        imageViewProva = findViewById(R.id.imgFoto);
         btnRedimensionar = findViewById(R.id.btnRedimensionar);
         btnLimiarizar = findViewById(R.id.btnLimiarizar);
     }
 
     public void setListeners() {
         btnTiraFoto.setOnClickListener(v -> {
-            getAlertDialog(this::setFileProvaEmBranco, REQUEST_TAKE_PHOTO_PROVA_BRANCO, IMAGE_RESULT_PROVA_BRANCO).show();
+            getAlertDialog(this::setFile, REQUEST_TAKE_PHOTO_PROVA_BRANCO, IMAGE_RESULT_PROVA_BRANCO).show();
 
         });
 
         btnTonsDeCinza.setOnClickListener(v -> {
-            setGreyScale(bitmapProvaEmBranco, imageViewProvaEmBranco);
+            setGreyScale(bitmapProva, imageViewProva);
             btnTonsDeCinza.setVisibility(View.GONE);
             btnRedimensionar.setVisibility(View.VISIBLE);
         });
 
         btnRedimensionar.setOnClickListener(v -> {
             Mat a = new Mat();
-            Bitmap bmp32 = bitmapProvaEmBranco.copy(Bitmap.Config.ARGB_8888, true);
+            Bitmap bmp32 = bitmapProva.copy(Bitmap.Config.ARGB_8888, true);
             Utils.bitmapToMat(bmp32, a);
 
             MatOfPoint2f finalCorners = getCorners(a);
             if (finalCorners.toArray().length == 4) {
                 Mat result = warpPerspective(a, finalCorners);
 
-                Utils.matToBitmap(result, bitmapProvaEmBranco);
+                Utils.matToBitmap(result, bitmapProva);
 
-                imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
+                imageViewProva.setImageBitmap(bitmapProva);
                 btnRedimensionar.setVisibility(View.GONE);
                 btnLimiarizar.setVisibility(View.VISIBLE);
 
-               fileProvaEmBranco = storeImage(bitmapProvaEmBranco);
+               file = storeImage(bitmapProva);
 
             } else {
                 System.out.println("ERROR");
@@ -119,9 +127,13 @@ public class SelecionaProva extends AppCompatActivity {
         });
 
         btnLimiarizar.setOnClickListener(v -> {
-            Intent intent = new Intent(this, LinearizarProvaEmBranco.class);
+            Intent intent = new Intent(this, LimiarizarActivity.class);
 
-            intent.putExtra("FILE", fileProvaEmBranco);
+
+            File[] files = new File[3];
+            files[tipoProva.ordinal()] = file;
+            intent.putExtra("FILE", files);
+            intent.putExtra("TIPO_PROVA", tipoProva);
             startActivity(intent);
         });
     }
@@ -210,7 +222,7 @@ public class SelecionaProva extends AppCompatActivity {
         // STEP 11: Warp the input image using the computed homography matrix
         Imgproc.warpPerspective(mat, result, homography, size);
 
-        Size out = new Size(bitmapProvaEmBranco.getWidth(), bitmapProvaEmBranco.getHeight());
+        Size out = new Size(bitmapProva.getWidth(), bitmapProva.getHeight());
         Imgproc.resize(result, result, out);
         return result;
     }
@@ -242,8 +254,8 @@ public class SelecionaProva extends AppCompatActivity {
         Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
 
 
-        //Utils.matToBitmap(edges, bitmapProvaEmBranco);
-        //imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
+        //Utils.matToBitmap(edges, bitmapProva);
+        //imageViewProva.setImageBitmap(bitmapProva);
         //Image imageToShow = Utils.mat2Image(edges);
         //updateImageView(cannyFrame, imageToShow);
 
@@ -333,8 +345,8 @@ public class SelecionaProva extends AppCompatActivity {
         return new MatOfPoint(mat.toArray());
     }
 
-    public void setFileProvaEmBranco(File fileProvaEmBranco) {
-        this.fileProvaEmBranco = fileProvaEmBranco;
+    public void setFile(File file) {
+        this.file = file;
     }
 
     private AlertDialog getAlertDialog(Consumer<File> setFileProvaEmBranco, int resultTakePicture, int resultChoosePicture) {
@@ -444,7 +456,7 @@ public class SelecionaProva extends AppCompatActivity {
      * @param view
      */
     public void telaInicial(View view) {
-        Intent intent = new Intent(this, TelaInicial.class);
+        Intent intent = new Intent(this, TelaInicialActivity.class);
         startActivity(intent);
     }
 
@@ -454,17 +466,17 @@ public class SelecionaProva extends AppCompatActivity {
      */
     public void telaLinearizaProva(View view) {
 
-        Intent intent = new Intent(getApplicationContext(), LinearizarProvaEmBranco.class);
+        Intent intent = new Intent(getApplicationContext(), LimiarizarActivity.class);
 
-        intent.putExtra("prova", fileProvaEmBranco);
+        intent.putExtra("prova", file);
 
         startActivity(intent);
     }
 
 
     private void setPic(Consumer<Bitmap> setBitmap, String path) {
-        int targetW = imageViewProvaEmBranco.getWidth();
-        int targetH = imageViewProvaEmBranco.getHeight();
+        int targetW = imageViewProva.getWidth();
+        int targetH = imageViewProva.getHeight();
 
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         bmOptions.inJustDecodeBounds = true;
@@ -504,8 +516,8 @@ public class SelecionaProva extends AppCompatActivity {
         imageView.setImageBitmap(bitmap);
     }
 
-    public void setBitmapProvaEmBranco(Bitmap bitmapProvaEmBranco) {
-        this.bitmapProvaEmBranco = bitmapProvaEmBranco;
+    public void setBitmapProva(Bitmap bitmapProva) {
+        this.bitmapProva = bitmapProva;
     }
 
     private void galleryAddPic(String path) {
@@ -517,7 +529,7 @@ public class SelecionaProva extends AppCompatActivity {
 
 
         if (path != null) {
-            bitmapProvaEmBranco = BitmapFactory.decodeFile(path);
+            bitmapProva = BitmapFactory.decodeFile(path);
             try {
                 ExifInterface exif = new ExifInterface(path);
                 int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
@@ -527,17 +539,17 @@ public class SelecionaProva extends AppCompatActivity {
                 if (orientation == 6) {
                     Matrix matrix = new Matrix();
                     matrix.postRotate(90);
-                    bitmapProvaEmBranco = Bitmap.createBitmap(bitmapProvaEmBranco, 0, 0, bitmapProvaEmBranco.getWidth(), bitmapProvaEmBranco.getHeight(), matrix, true);
+                    bitmapProva = Bitmap.createBitmap(bitmapProva, 0, 0, bitmapProva.getWidth(), bitmapProva.getHeight(), matrix, true);
                 } else if(orientation == 8){
                     Matrix matrix = new Matrix();
                     matrix.postRotate(270);
-                    bitmapProvaEmBranco = Bitmap.createBitmap(bitmapProvaEmBranco, 0, 0, bitmapProvaEmBranco.getWidth(), bitmapProvaEmBranco.getHeight(), matrix, true);
+                    bitmapProva = Bitmap.createBitmap(bitmapProva, 0, 0, bitmapProva.getWidth(), bitmapProva.getHeight(), matrix, true);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
+            imageViewProva.setImageBitmap(bitmapProva);
         }
     }
 
@@ -582,8 +594,8 @@ public class SelecionaProva extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_TAKE_PHOTO_PROVA_BRANCO && resultCode == RESULT_OK) {
 
-            setPic(imageViewProvaEmBranco, this::setBitmapProvaEmBranco, fileProvaEmBranco.getAbsolutePath());
-            galleryAddPic(fileProvaEmBranco.getAbsolutePath());
+            setPic(imageViewProva, this::setBitmapProva, file.getAbsolutePath());
+            galleryAddPic(file.getAbsolutePath());
             btnTonsDeCinza.setVisibility(View.VISIBLE);
             btnRedimensionar.setVisibility(View.GONE);
             btnLimiarizar.setVisibility(View.GONE);
@@ -591,11 +603,11 @@ public class SelecionaProva extends AppCompatActivity {
 
             String filePath = getImageFilePath(data);
             if (filePath != null) {
-                bitmapProvaEmBranco = BitmapFactory.decodeFile(filePath);
+                bitmapProva = BitmapFactory.decodeFile(filePath);
                 changeOrientation(filePath);
 
 
-                imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
+                imageViewProva.setImageBitmap(bitmapProva);
             }
 
             btnTonsDeCinza.setVisibility(View.VISIBLE);
@@ -613,11 +625,11 @@ public class SelecionaProva extends AppCompatActivity {
             if (orientation == 6) {
                 Matrix matrix = new Matrix();
                 matrix.postRotate(90);
-                bitmapProvaEmBranco = Bitmap.createBitmap(bitmapProvaEmBranco, 0, 0, bitmapProvaEmBranco.getWidth(), bitmapProvaEmBranco.getHeight(), matrix, true);
+                bitmapProva = Bitmap.createBitmap(bitmapProva, 0, 0, bitmapProva.getWidth(), bitmapProva.getHeight(), matrix, true);
             } else if(orientation == 8){
                 Matrix matrix = new Matrix();
                 matrix.postRotate(270);
-                bitmapProvaEmBranco = Bitmap.createBitmap(bitmapProvaEmBranco, 0, 0, bitmapProvaEmBranco.getWidth(), bitmapProvaEmBranco.getHeight(), matrix, true);
+                bitmapProva = Bitmap.createBitmap(bitmapProva, 0, 0, bitmapProva.getWidth(), bitmapProva.getHeight(), matrix, true);
             }
         } catch (IOException e) {
             e.printStackTrace();

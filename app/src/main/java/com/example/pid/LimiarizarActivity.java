@@ -9,8 +9,11 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvException;
@@ -25,28 +28,43 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class LinearizarProvaEmBranco extends AppCompatActivity {
+public class LimiarizarActivity extends AppCompatActivity {
 
+    Button btnVisualizar, btnCancelar, btnOk;
     public Bitmap originalBitmap;
     public ImageView provaEmBranco;
     private double thresh = 170;
     private SeekBar seekBar;
+    TextView limiar;
+    TipoProva tipoProva;
+    File [] files;
+    File file;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_linearizar_prova_em_branco);
+        setContentView(R.layout.activity_limiarizar);
 
+        Intent intent = this.getIntent();
+        tipoProva = (TipoProva) intent.getSerializableExtra("TIPO_PROVA");
+        files = (File[]) intent.getSerializableExtra("FILE");
+        file = files[tipoProva.ordinal()];
 
         initializeViews();
 
         this.seekBar.setProgress(170);
         colocaImagem();
+        setListeners();
+    }
+
+    private void setListeners() {
+        btnVisualizar.setOnClickListener(v -> setBinary(LimiarizarActivity.this.provaEmBranco));
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                LinearizarProvaEmBranco.this.thresh = progress;
-                setBinary(LinearizarProvaEmBranco.this.provaEmBranco);
+                LimiarizarActivity.this.thresh = progress;
+                LimiarizarActivity.this.limiar.setText("" + progress);
             }
 
             @Override
@@ -59,18 +77,40 @@ public class LinearizarProvaEmBranco extends AppCompatActivity {
 
             }
         });
+
+        btnOk.setOnClickListener(v -> {
+            if(tipoProva == TipoProva.PROVA_EM_BRANCO) {
+                Intent intent = new Intent(this, SelecionaProvaActivity.class);
+                intent.putExtra("TITLE", "Gabarito");
+                intent.putExtra("TIPO_PROVA", TipoProva.GABARITO);
+                intent.putExtra("FILE", files);
+                startActivity(intent);
+            } else if (tipoProva == TipoProva.GABARITO){
+                Intent intent = new Intent(this, SelecionaProvaActivity.class);
+                intent.putExtra("TITLE", "Resposta");
+                intent.putExtra("TIPO_PROVA", TipoProva.RESPOSTA);
+                intent.putExtra("FILE", files);
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "Else", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     /**
      * Initializes the views of the activity
      */
     private void initializeViews() {
-        provaEmBranco = (ImageView) findViewById(R.id.provaEmBranco);
+        provaEmBranco = findViewById(R.id.provaEmBranco);
         seekBar = findViewById(R.id.seekBar);
+        btnOk = findViewById(R.id.btnOk);
+        btnCancelar = findViewById(R.id.btnCancelar);
+        btnVisualizar = findViewById(R.id.btnVisualizar);
+        limiar = findViewById(R.id.limiar);
     }
 
     private void colocaImagem() {
-        File file = (File) getIntent().getSerializableExtra("FILE");
+
 
         String filePath = file.getPath();
 
@@ -82,9 +122,8 @@ public class LinearizarProvaEmBranco extends AppCompatActivity {
 
     }
 
-    public void selecionarProvaEmBranco(View view) {
-        Intent intent = new Intent(this, SelecionaProva.class);
-        startActivity(intent);
+    public void retornar(View view) {
+        finish();
     }
 
     private Mat setBinary(ImageView imageView) {
@@ -96,7 +135,8 @@ public class LinearizarProvaEmBranco extends AppCompatActivity {
         //Imgproc.adaptiveThreshold(destination, destination2, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 7);
         Imgproc.threshold(source, dest, thresh, 255, Imgproc.THRESH_BINARY);
         Bitmap bitmap = convertMatToBitMap(dest);
-        storeImage(bitmap);
+        file = storeImage(bitmap);
+        files[tipoProva.ordinal()] = file;
         imageView.setImageBitmap(bitmap);
         return dest;
     }

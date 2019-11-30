@@ -3,16 +3,14 @@ package com.example.pid;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageView;
 
 import org.opencv.android.OpenCVLoader;
 
 import java.io.File;
 
-public class TelaInicial extends AppCompatActivity {
+public class TelaInicialActivity extends AppCompatActivity {
 
 
 
@@ -25,7 +23,12 @@ public class TelaInicial extends AppCompatActivity {
     }
 
     public void provaEmBranco(View view) {
-        Intent intent = new Intent(this, SelecionaProva.class);
+        Intent intent = new Intent(this, SelecionaProvaActivity.class);
+        intent.putExtra("TITLE", "Prova em Branco");
+        intent.putExtra("TIPO_PROVA", TipoProva.PROVA_EM_BRANCO);
+        File[] files = new File[3];
+        intent.putExtra("FILE", files);
+
         startActivity(intent);
     }
 }

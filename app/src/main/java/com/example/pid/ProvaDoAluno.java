@@ -21,7 +21,7 @@ public class ProvaDoAluno extends AppCompatActivity {
      * @param view
      */
     public void telaInicial(View view) {
-        Intent intent = new Intent(this, TelaInicial.class);
+        Intent intent = new Intent(this, TelaInicialActivity.class);
         startActivity(intent);
     }
 

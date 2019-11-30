@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SelecionaProva">
+    tools:context=".SelecionaProvaActivity">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -27,11 +27,11 @@
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="8dp"
-                    android:text="Selecione a prova em branco"
+                    android:text="Defina a imagem"
                     android:textAlignment="center"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView6" />
+                    app:layout_constraintTop_toBottomOf="@+id/title" />
 
                 <ImageView
                     android:id="@+id/imgFoto"
@@ -98,7 +98,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/btnTirarFoto" />
 
                 <TextView
-                    android:id="@+id/textView6"
+                    android:id="@+id/title"
                     android:layout_width="127dp"
                     android:layout_height="0dp"
                     android:layout_marginStart="8dp"
