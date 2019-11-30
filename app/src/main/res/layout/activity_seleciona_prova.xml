@@ -120,8 +120,9 @@
                     android:text="Redimensionar"
                     android:textAlignment="center"
                     android:visibility="gone"
-                    app:layout_constraintTop_toBottomOf="@+id/btnTonsDeCinza"
-                    tools:layout_editor_absoluteX="129dp" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnTonsDeCinza" />
 
                 <Button
                     android:id="@+id/btnLimiarizar"
@@ -130,8 +131,9 @@
                     android:layout_marginTop="8dp"
                     android:text="Limiarizar"
                     android:visibility="gone"
-                    app:layout_constraintTop_toBottomOf="@+id/btnRedimensionar"
-                    tools:layout_editor_absoluteX="146dp" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnRedimensionar" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
     </ScrollView>
