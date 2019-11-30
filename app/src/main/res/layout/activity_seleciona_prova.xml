@@ -36,7 +36,6 @@
 
     <Button
         android:id="@+id/btnFotoProvaEmBranco"
-        android:onClick="telaLinearizaProva"
         android:layout_width="wrap_content"
         android:layout_height="91dp"
         android:layout_marginStart="8dp"
@@ -53,14 +52,14 @@
         android:layout_width="wrap_content"
         android:layout_height="30dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="112dp"
+        android:layout_marginTop="84dp"
         android:layout_marginEnd="8dp"
         android:text="Ou comece do zero:"
         android:textAlignment="center"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnTirarFoto" />
+        app:layout_constraintTop_toBottomOf="@+id/btnLimiarizar" />
 
     <Button
         android:id="@+id/btnRecomecar"
@@ -69,6 +68,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="3dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         android:onClick="telaInicial"
         android:text="Começar de novo"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -87,5 +87,17 @@
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnFotoProvaEmBranco" />
+
+    <Button
+        android:id="@+id/btnLimiarizar"
+        android:onClick="telaLinearizaProva"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/limiarizar"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnTirarFoto" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

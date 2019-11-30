@@ -8,6 +8,9 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -27,7 +30,7 @@ import java.util.Objects;
 
 public class SelecionaProva extends AppCompatActivity {
     // variaveis globais
-    Button btnCamera, btnTiraFoto;
+    Button btnCamera, btnTiraFoto, limiariza;
     private File fileProvaEmBranco;
     static final int REQUEST_TAKE_PHOTO_PROVA_BRANCO = 1;
     private final static int IMAGE_RESULT_PROVA_BRANCO = 200;
@@ -50,11 +53,13 @@ public class SelecionaProva extends AppCompatActivity {
     private void initializeViews() {
         btnCamera = findViewById(R.id.btnFotoProvaEmBranco);
         btnTiraFoto = findViewById(R.id.btnTirarFoto);
+        limiariza = findViewById(R.id.btnLimiarizar);
     }
 
     public void setListeners() {
         btnTiraFoto.setOnClickListener(v -> {
             getAlertDialog(this::setFileProvaEmBranco, REQUEST_TAKE_PHOTO_PROVA_BRANCO, IMAGE_RESULT_PROVA_BRANCO).show();
+            limiariza.setVisibility(v.VISIBLE);
         });
     }
 
@@ -167,7 +172,11 @@ public class SelecionaProva extends AppCompatActivity {
      * @param view
      */
     public void telaLinearizaProva(View view) {
-        Intent intent = new Intent(this, LinearizarProvaEmBranco.class);
+
+        Intent intent = new Intent(getApplicationContext(), LinearizarProvaEmBranco.class);
+
+        intent.putExtra("prova", fileProvaEmBranco);
+
         startActivity(intent);
     }
 }
