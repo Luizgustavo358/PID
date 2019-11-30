@@ -14,7 +14,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,6 +24,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +40,7 @@ import java.util.Objects;
 
 public class SelecionaProva extends AppCompatActivity {
     // variaveis globais
-    Button btnTiraFoto, limiariza;
+    Button btnTiraFoto, btnTonsDeCinza;
     private File fileProvaEmBranco;
     static final int REQUEST_TAKE_PHOTO_PROVA_BRANCO = 1;
     private final static int IMAGE_RESULT_PROVA_BRANCO = 200;
@@ -61,14 +64,13 @@ public class SelecionaProva extends AppCompatActivity {
       */
     private void initializeViews() {
         btnTiraFoto = findViewById(R.id.btnTirarFoto);
-        limiariza = findViewById(R.id.btnLimiarizar);
+        btnTonsDeCinza = findViewById(R.id.btnTonsDeCinza);
         imageViewProvaEmBranco = findViewById(R.id.imgFoto);
     }
 
     public void setListeners() {
         btnTiraFoto.setOnClickListener(v -> {
             getAlertDialog(this::setFileProvaEmBranco, REQUEST_TAKE_PHOTO_PROVA_BRANCO, IMAGE_RESULT_PROVA_BRANCO).show();
-            limiariza.setVisibility(v.VISIBLE);
         });
     }
 
@@ -211,6 +213,7 @@ public class SelecionaProva extends AppCompatActivity {
 
     }
     private void setPic(ImageView imageView, Consumer<Bitmap> setBitmap, String path) {
+
         int targetW = imageView.getWidth();
         int targetH = imageView.getHeight();
 
@@ -254,6 +257,10 @@ public class SelecionaProva extends AppCompatActivity {
                 if (orientation == 6) {
                     Matrix matrix = new Matrix();
                     matrix.postRotate(90);
+                    bitmapProvaEmBranco = Bitmap.createBitmap(bitmapProvaEmBranco, 0, 0, bitmapProvaEmBranco.getWidth(), bitmapProvaEmBranco.getHeight(), matrix, true);
+                } else if(orientation == 8){
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(270);
                     bitmapProvaEmBranco = Bitmap.createBitmap(bitmapProvaEmBranco, 0, 0, bitmapProvaEmBranco.getWidth(), bitmapProvaEmBranco.getHeight(), matrix, true);
                 }
             } catch (IOException e) {
@@ -307,7 +314,7 @@ public class SelecionaProva extends AppCompatActivity {
 
             setPic(imageViewProvaEmBranco, this::setBitmapProvaEmBranco, fileProvaEmBranco.getAbsolutePath());
             galleryAddPic(fileProvaEmBranco.getAbsolutePath());
-
+            btnTonsDeCinza.setVisibility(View.VISIBLE);
         } else if (requestCode == IMAGE_RESULT_PROVA_BRANCO && resultCode == Activity.RESULT_OK) {
 
             String filePath = getImageFilePath(data);
@@ -319,7 +326,8 @@ public class SelecionaProva extends AppCompatActivity {
                 imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
             }
 
-
+            btnTonsDeCinza.setVisibility(View.VISIBLE);
+            imageViewProvaEmBranco.setVisibility(View.VISIBLE);
         }
     }
 
@@ -329,14 +337,28 @@ public class SelecionaProva extends AppCompatActivity {
             int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
 
             Toast.makeText(this, "Branco Orientation: " + orientation, Toast.LENGTH_LONG).show();
-
             if (orientation == 6) {
                 Matrix matrix = new Matrix();
                 matrix.postRotate(90);
+                bitmapProvaEmBranco = Bitmap.createBitmap(bitmapProvaEmBranco, 0, 0, bitmapProvaEmBranco.getWidth(), bitmapProvaEmBranco.getHeight(), matrix, true);
+            } else if(orientation == 8){
+                Matrix matrix = new Matrix();
+                matrix.postRotate(270);
                 bitmapProvaEmBranco = Bitmap.createBitmap(bitmapProvaEmBranco, 0, 0, bitmapProvaEmBranco.getWidth(), bitmapProvaEmBranco.getHeight(), matrix, true);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private Mat setGreyScale(Bitmap bitmap, ImageView imageView) {
+        Mat mat = new Mat();
+        Bitmap bmp32 = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Utils.bitmapToMat(bmp32, mat);
+        Mat destination = new Mat();
+        Imgproc.cvtColor(mat, destination, Imgproc.COLOR_RGB2GRAY);
+        Utils.matToBitmap(destination, bitmap);
+        imageView.setImageBitmap(bitmap);
+        return destination;
     }
 }
