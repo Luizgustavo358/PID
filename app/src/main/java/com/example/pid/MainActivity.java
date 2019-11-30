@@ -318,22 +318,22 @@ public class MainActivity extends AppCompatActivity {
                     new Point(kernelSize, kernelSize));
 
 
-            Mat matBranco = new Mat();
+            Mat a = new Mat();
             Bitmap bmp32 = bitmapProvaEmBranco.copy(Bitmap.Config.ARGB_8888, true);
-            Utils.bitmapToMat(bmp32, matBranco);
+            Utils.bitmapToMat(bmp32, a);
 
-            MatOfPoint2f finalCorners = getCorners(matBranco);
+            MatOfPoint2f finalCorners = getCorners(a);
             if (finalCorners.toArray().length == 4) {
-                Mat result = warpPerspective(matBranco, finalCorners);
+                Mat result = warpPerspective(a, finalCorners);
 
                 Utils.matToBitmap(result, bitmapProvaEmBranco);
 
-                matBranco = setBinary(bitmapProvaEmBranco, imageViewProvaEmBranco,
+                a = setBinary(bitmapProvaEmBranco, imageViewProvaEmBranco,
                         setGreyScale(bitmapProvaEmBranco, imageViewProvaEmBranco));
 
-                Imgproc.dilate(matBranco, matBranco, element);
+                Imgproc.dilate(a, a, element);
 
-                Utils.matToBitmap(matBranco, bitmapProvaEmBranco);
+                Utils.matToBitmap(a, bitmapProvaEmBranco);
                 imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
 
                 storeImage(bitmapProvaEmBranco);
@@ -342,19 +342,19 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Folha não identificada - primeira foto", Toast.LENGTH_LONG).show();
             }
 
-            Mat matGabarito = new Mat();
+            Mat b = new Mat();
             Bitmap bmpGab = bitmapGabarito.copy(Bitmap.Config.ARGB_8888, true);
-            Utils.bitmapToMat(bmpGab, matGabarito);
+            Utils.bitmapToMat(bmpGab, b);
 
-            finalCorners = getCorners(matGabarito);
+            finalCorners = getCorners(b);
             if (finalCorners.toArray().length == 4) {
-                Mat result = warpPerspective(matGabarito, finalCorners);
+                Mat result = warpPerspective(b, finalCorners);
                 Utils.matToBitmap(result, bitmapGabarito);
 
-                matGabarito = setBinary(bitmapGabarito, imageViewGabarito, setGreyScale(bitmapGabarito, imageViewGabarito));                //Imgproc.dilate(matGabarito, matGabarito, element);
-                Imgproc.erode(matGabarito, matGabarito, element);
+                b = setBinary(bitmapGabarito, imageViewGabarito, setGreyScale(bitmapGabarito, imageViewGabarito));                //Imgproc.dilate(matGabarito, matGabarito, element);
+                Imgproc.erode(b, b, element);
 
-                Utils.matToBitmap(matGabarito, bitmapGabarito);
+                Utils.matToBitmap(b, bitmapGabarito);
                 imageViewGabarito.setImageBitmap(bitmapGabarito);
 
                 storeImage(bitmapGabarito);
@@ -366,7 +366,7 @@ public class MainActivity extends AppCompatActivity {
             Mat r = new Mat();
 
 
-            Core.subtract(matGabarito, matBranco, r);
+            Core.subtract(b, a, r);
 
             kernelSize = 6;
             element = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(2 * kernelSize + 1, 2 * kernelSize + 1),

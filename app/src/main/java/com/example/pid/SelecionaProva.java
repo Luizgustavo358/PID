@@ -1,16 +1,21 @@
 package com.example.pid;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,6 +23,8 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +41,8 @@ public class SelecionaProva extends AppCompatActivity {
     private File fileProvaEmBranco;
     static final int REQUEST_TAKE_PHOTO_PROVA_BRANCO = 1;
     private final static int IMAGE_RESULT_PROVA_BRANCO = 200;
+    private Bitmap bitmapProvaEmBranco;
+    private ImageView imageViewProvaEmBranco;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +63,7 @@ public class SelecionaProva extends AppCompatActivity {
         btnCamera = findViewById(R.id.btnFotoProvaEmBranco);
         btnTiraFoto = findViewById(R.id.btnTirarFoto);
         limiariza = findViewById(R.id.btnLimiarizar);
+        imageViewProvaEmBranco = findViewById(R.id.imgFoto);
     }
 
     public void setListeners() {
@@ -178,5 +188,156 @@ public class SelecionaProva extends AppCompatActivity {
         intent.putExtra("prova", fileProvaEmBranco);
 
         startActivity(intent);
+    }
+
+
+    private void setPic(Consumer<Bitmap> setBitmap, String path) {
+        int targetW = imageViewProvaEmBranco.getWidth();
+        int targetH = imageViewProvaEmBranco.getHeight();
+
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(path, bmOptions);
+        setBitmap.accept(bitmap);
+
+    }
+    private void setPic(ImageView imageView, Consumer<Bitmap> setBitmap, String path) {
+        int targetW = imageView.getWidth();
+        int targetH = imageView.getHeight();
+
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(path, bmOptions);
+        setBitmap.accept(bitmap);
+        imageView.setImageBitmap(bitmap);
+    }
+
+    public void setBitmapProvaEmBranco(Bitmap bitmapProvaEmBranco) {
+        this.bitmapProvaEmBranco = bitmapProvaEmBranco;
+    }
+
+    private void galleryAddPic(String path) {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(path);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
+
+
+        if (path != null) {
+            bitmapProvaEmBranco = BitmapFactory.decodeFile(path);
+            try {
+                ExifInterface exif = new ExifInterface(path);
+                int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+
+                Toast.makeText(this, "Branco Orientation: " + orientation, Toast.LENGTH_LONG).show();
+
+                if (orientation == 6) {
+                    Matrix matrix = new Matrix();
+                    matrix.postRotate(90);
+                    bitmapProvaEmBranco = Bitmap.createBitmap(bitmapProvaEmBranco, 0, 0, bitmapProvaEmBranco.getWidth(), bitmapProvaEmBranco.getHeight(), matrix, true);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
+        }
+    }
+
+    public String getImageFilePath(Intent data) {
+        return getImageFromFilePath(data);
+    }
+
+
+    private String getImageFromFilePath(Intent data) {
+        boolean isCamera = data == null || data.getData() == null;
+
+        if (isCamera) return getCaptureImageOutputUri().getPath();
+        else return getPathFromURI(data.getData());
+
+    }
+
+    private String getPathFromURI(Uri contentUri) {
+        String[] proj = {MediaStore.Audio.Media.DATA};
+        Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
+        cursor.moveToFirst();
+        String path = cursor.getString(column_index);
+        cursor.close();
+        return path;
+    }
+
+
+    private Uri getCaptureImageOutputUri() {
+        Uri outputFileUri = null;
+        File getImage = getExternalFilesDir("");
+        if (getImage != null) {
+            outputFileUri = Uri.fromFile(new File(getImage.getPath(), "profile.png"));
+        }
+        return outputFileUri;
+    }
+
+
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_TAKE_PHOTO_PROVA_BRANCO && resultCode == RESULT_OK) {
+
+            setPic(imageViewProvaEmBranco, this::setBitmapProvaEmBranco, fileProvaEmBranco.getAbsolutePath());
+            galleryAddPic(fileProvaEmBranco.getAbsolutePath());
+
+        } else if (requestCode == IMAGE_RESULT_PROVA_BRANCO && resultCode == Activity.RESULT_OK) {
+
+            String filePath = getImageFilePath(data);
+            if (filePath != null) {
+                bitmapProvaEmBranco = BitmapFactory.decodeFile(filePath);
+                changeOrientation(filePath);
+
+
+                imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
+            }
+
+
+        }
+    }
+
+    private void changeOrientation(String filePath) {
+        try {
+            ExifInterface exif = new ExifInterface(filePath);
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+
+            Toast.makeText(this, "Branco Orientation: " + orientation, Toast.LENGTH_LONG).show();
+
+            if (orientation == 6) {
+                Matrix matrix = new Matrix();
+                matrix.postRotate(90);
+                bitmapProvaEmBranco = Bitmap.createBitmap(bitmapProvaEmBranco, 0, 0, bitmapProvaEmBranco.getWidth(), bitmapProvaEmBranco.getHeight(), matrix, true);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
