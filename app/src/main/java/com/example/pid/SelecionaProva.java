@@ -86,6 +86,7 @@ public class SelecionaProva extends AppCompatActivity {
     public void setListeners() {
         btnTiraFoto.setOnClickListener(v -> {
             getAlertDialog(this::setFileProvaEmBranco, REQUEST_TAKE_PHOTO_PROVA_BRANCO, IMAGE_RESULT_PROVA_BRANCO).show();
+
         });
 
         btnTonsDeCinza.setOnClickListener(v -> {
@@ -584,6 +585,8 @@ public class SelecionaProva extends AppCompatActivity {
             setPic(imageViewProvaEmBranco, this::setBitmapProvaEmBranco, fileProvaEmBranco.getAbsolutePath());
             galleryAddPic(fileProvaEmBranco.getAbsolutePath());
             btnTonsDeCinza.setVisibility(View.VISIBLE);
+            btnRedimensionar.setVisibility(View.GONE);
+            btnLimiarizar.setVisibility(View.GONE);
         } else if (requestCode == IMAGE_RESULT_PROVA_BRANCO && resultCode == Activity.RESULT_OK) {
 
             String filePath = getImageFilePath(data);
@@ -596,7 +599,8 @@ public class SelecionaProva extends AppCompatActivity {
             }
 
             btnTonsDeCinza.setVisibility(View.VISIBLE);
-            imageViewProvaEmBranco.setVisibility(View.VISIBLE);
+            btnRedimensionar.setVisibility(View.GONE);
+            btnLimiarizar.setVisibility(View.GONE);
         }
     }
 
