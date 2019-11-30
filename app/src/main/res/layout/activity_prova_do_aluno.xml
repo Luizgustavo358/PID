@@ -51,6 +51,17 @@
                     app:layout_constraintTop_toBottomOf="@+id/imgFoto" />
 
                 <Button
+                    android:id="@+id/btnTonsDeCinza"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Tons de Cinza"
+                    android:visibility="invisible"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnTirarFoto" />
+
+                <Button
                     android:id="@+id/btnRecomecar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -65,19 +76,20 @@
                     android:id="@+id/textView10"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="16dp"
                     android:text="Ou comece do zero:"
                     android:textAlignment="center"
                     android:textSize="18sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/btnTirarFoto" />
+                    app:layout_constraintTop_toBottomOf="@+id/btnTonsDeCinza" />
 
                 <ImageView
                     android:id="@+id/imgFoto"
                     android:layout_width="380dp"
                     android:layout_height="390dp"
                     android:layout_marginTop="11dp"
+                    android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textView7"
