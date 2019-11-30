@@ -26,36 +26,38 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:layout_marginTop="25dp"
+                    android:layout_marginTop="8dp"
                     android:layout_marginEnd="8dp"
                     android:max="255"
                     android:visibility="visible"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/provaEmBranco" />
+                    app:layout_constraintTop_toBottomOf="@+id/limiar" />
 
                 <Button
-                    android:id="@+id/button2"
+                    android:id="@+id/btnCancelar"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="32dp"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="32dp"
                     android:layout_weight="1"
                     android:onClick="selecionarProvaEmBranco"
                     android:text="Cancelar"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/seekBar" />
+                    app:layout_constraintTop_toBottomOf="@+id/btnVisualizar" />
 
                 <Button
-                    android:id="@+id/btnLinearizar"
+                    android:id="@+id/btnVisualizar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
-                    android:layout_marginEnd="32dp"
+                    android:layout_marginEnd="144dp"
                     android:layout_weight="1"
                     android:onClick="selecionaGabarito"
-                    android:text="Limiarizar"
+                    android:text="Visualizar"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.986"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/seekBar" />
 
                 <ImageView
@@ -70,6 +72,26 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:srcCompat="@tools:sample/avatars" />
+
+                <TextView
+                    android:id="@+id/limiar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="170"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/provaEmBranco" />
+
+                <Button
+                    android:id="@+id/btnOk"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginEnd="32dp"
+                    android:text="@android:string/ok"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnVisualizar" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
     </ScrollView>
