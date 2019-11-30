@@ -109,14 +109,23 @@ public class SelecionaProva extends AppCompatActivity {
                 btnRedimensionar.setVisibility(View.GONE);
                 btnLimiarizar.setVisibility(View.VISIBLE);
 
-                storeImage(bitmapProvaEmBranco);
+               fileProvaEmBranco = storeImage(bitmapProvaEmBranco);
 
             } else {
                 System.out.println("ERROR");
                 Toast.makeText(this, "Folha não identificada - primeira foto", Toast.LENGTH_LONG).show();
             }
         });
+
+        btnLimiarizar.setOnClickListener(v -> {
+            Intent intent = new Intent(this, LinearizarProvaEmBranco.class);
+
+            intent.putExtra("FILE", fileProvaEmBranco);
+            startActivity(intent);
+        });
     }
+
+
 
 
     private static double getDistance(Point p1, Point p2) {
@@ -152,22 +161,24 @@ public class SelecionaProva extends AppCompatActivity {
 
     }
 
-    private void storeImage(Bitmap image) {
+    private File storeImage(Bitmap image) {
 
         try {
             File pictureFile = getOutputMediaFile();
             if (pictureFile == null) {
                 System.out.println("******************* Error creating media file, check storage permissions: ");// e.getMessage());
-                return;
+                return null;
             }
             FileOutputStream fos = new FileOutputStream(pictureFile);
             image.compress(Bitmap.CompressFormat.JPEG, 90, fos);
             fos.close();
+            return pictureFile;
         } catch (FileNotFoundException e) {
             System.out.println("**************** File not found: " + e.getMessage());
         } catch (IOException e) {
             System.out.println("**************** Error accessing file: " + e.getMessage());
         }
+        return null;
     }
 
 
