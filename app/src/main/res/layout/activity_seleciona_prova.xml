@@ -84,7 +84,7 @@
                     android:textSize="18sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/btnTonsDeCinza" />
+                    app:layout_constraintTop_toBottomOf="@+id/btnLimiarizar" />
 
                 <Button
                     android:id="@+id/btnTonsDeCinza"
@@ -92,7 +92,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="Tons de Cinza"
-                    android:visibility="invisible"
+                    android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/btnTirarFoto" />
@@ -111,6 +111,27 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/btnRedimensionar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Redimensionar"
+                    android:textAlignment="center"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@+id/btnTonsDeCinza"
+                    tools:layout_editor_absoluteX="129dp" />
+
+                <Button
+                    android:id="@+id/btnLimiarizar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Limiarizar"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@+id/btnRedimensionar"
+                    tools:layout_editor_absoluteX="146dp" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
     </ScrollView>
