@@ -42,6 +42,8 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.calib3d.Calib3d;
+import org.opencv.core.Core;
+import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfInt;
@@ -83,6 +85,9 @@ public class MainActivity extends AppCompatActivity {
     private Animation showShadow;
 
     private Button button;
+
+    private Bitmap bitmap4;
+    private ImageView imageView4;
 
     private Bitmap bitmapProvaEmBranco;
     private ImageView imageViewProvaEmBranco;
@@ -221,11 +226,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     /**
      * Creates a new simplified contour from an original contour by extracting points defined by their indices in the original contour
+     *
      * @param origContour The original contour
-     * @param indices Indices of points to extract
+     * @param indices     Indices of points to extract
      */
     public static MatOfPoint getNewContourFromIndices(MatOfPoint origContour, MatOfInt indices) {
         int height = (int) indices.size().height;
@@ -233,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
         newContour.create(height, 1, CvType.CV_32FC2);
         for (int i = 0; i < height; ++i) {
             int index = (int) indices.get(i, 0)[0];
-            double[] point = new double[] {
+            double[] point = new double[]{
                     origContour.get(index, 0)[0],
                     origContour.get(index, 0)[1]
             };
@@ -244,12 +249,14 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Converts from MatOfPoint to MatOfPoint2f and vice versa
+     *
      * @param mat Input Mat
      * @return Converted Mat
      */
     public static MatOfPoint2f convert(MatOfPoint mat) {
         return new MatOfPoint2f(mat.toArray());
     }
+
     public static MatOfPoint convert(MatOfPoint2f mat) {
         return new MatOfPoint(mat.toArray());
     }
@@ -303,118 +310,75 @@ public class MainActivity extends AppCompatActivity {
 
         button.setOnClickListener(v -> {
 
+            int kernelSize = 2;
+            Mat element = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(2 * kernelSize + 1, 2 * kernelSize + 1),
+                    new Point(kernelSize, kernelSize));
 
-            Mat mat = new Mat();
+
+            Mat matBranco = new Mat();
             Bitmap bmp32 = bitmapProvaEmBranco.copy(Bitmap.Config.ARGB_8888, true);
-            Utils.bitmapToMat(bmp32, mat);
+            Utils.bitmapToMat(bmp32, matBranco);
 
-
-
-
-            final double DOWNSCALE_IMAGE_SIZE = 1000;
-            // STEP 1: Resize input image to img_proc to reduce computation
-            double ratio = DOWNSCALE_IMAGE_SIZE / Math.max(mat.width(), mat.height());
-            Size downscaledSize = new Size(mat.width() * ratio, mat.height() * ratio);
-            Mat dst = new Mat(downscaledSize, mat.type());
-            Imgproc.resize(mat, dst, downscaledSize);
-            Mat grayImage = new Mat();
-            Mat detectedEdges = new Mat();
-
-            // STEP 2: convert to grayscale
-            Imgproc.cvtColor(dst, grayImage, Imgproc.COLOR_BGR2GRAY);
-
-            // STEP 3: try to filter text inside document
-            Imgproc.medianBlur(grayImage, detectedEdges, 9);
-
-            // STEP 4: Edge detection
-            Mat edges = new Mat();
-            // Imgproc.erode(edges, edges, new Mat());
-            // Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
-            // canny detector, with ratio of lower:upper threshold of 3:1
-            Imgproc.Canny(detectedEdges, edges, 30, 30 * 3, 3, true);
-
-            // STEP 5: makes the object in white bigger to join nearby lines
-            Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
-
-            //Utils.matToBitmap(edges, bitmapProvaEmBranco);
-            //imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
-            //Image imageToShow = Utils.mat2Image(edges);
-            //updateImageView(cannyFrame, imageToShow);
-
-            // STEP 6: Compute the contours
-            List<MatOfPoint> contours = new ArrayList<>();
-            Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-            // STEP 7: Sort the contours by length and only keep the largest one
-            for (int i = 0; i < contours.size(); i++) {
-                MatOfPoint matOfPoint = contours.get(i);
-
-            }
-            MatOfPoint largestContour = getMaxContour(contours);
-
-            // STEP 8: Generate the convex hull of this contour
-            Mat convexHullMask = Mat.zeros(mat.rows(), mat.cols(), mat.type());
-            MatOfInt hullInt = new MatOfInt();
-            Imgproc.convexHull(largestContour, hullInt);
-            MatOfPoint hullPoint = getNewContourFromIndices(largestContour, hullInt);
-
-            // STEP 9: Use approxPolyDP to simplify the convex hull (this should give a quadrilateral)
-            MatOfPoint2f polygon = new MatOfPoint2f();
-            Imgproc.approxPolyDP(convert(hullPoint), polygon, 20, true);
-            List<MatOfPoint> tmp = new ArrayList<>();
-            tmp.add(convert(polygon));
-            restoreScaleMatOfPoint(tmp, ratio);
-            Imgproc.drawContours(convexHullMask, tmp, 0, new Scalar(25, 25, 255), 2);
-            // Image extractImageToShow = Utils.mat2Image(convexHullMask);
-            // updateImageView(extractFrame, extractImageToShow);
-            MatOfPoint2f finalCorners = new MatOfPoint2f();
-            Point[] tmpPoints = polygon.toArray();
-            for (Point point : tmpPoints) {
-                point.x = point.x / ratio;
-                point.y = point.y / ratio;
-            }
-            finalCorners.fromArray(tmpPoints);
-            boolean clockwise = true;
-            double currentThreshold = 30;
+            MatOfPoint2f finalCorners = getCorners(matBranco);
             if (finalCorners.toArray().length == 4) {
-                Size size = getRectangleSize(finalCorners);
-                Mat result = Mat.zeros(size, mat.type());
-                // STEP 10: Homography: Use findHomography to find the affine transformation of your paper sheet
-                Mat homography;
-                MatOfPoint2f dstPoints = new MatOfPoint2f();
-                Point[] arrDstPoints = { new Point(result.cols(), result.rows()), new Point(0, result.rows()), new Point(0, 0), new Point(result.cols(), 0) };
-                dstPoints.fromArray(arrDstPoints);
-                homography = Calib3d.findHomography(finalCorners, dstPoints);
-
-                // STEP 11: Warp the input image using the computed homography matrix
-                Imgproc.warpPerspective(mat, result, homography, size);
-
-                Size out = new Size(bitmapProvaEmBranco.getWidth(), bitmapProvaEmBranco.getHeight());
-                Imgproc.resize(result, result, out);
-
-
-
-
+                Mat result = warpPerspective(matBranco, finalCorners);
 
                 Utils.matToBitmap(result, bitmapProvaEmBranco);
 
-                Mat branco = setBinary(bitmapProvaEmBranco, imageViewProvaEmBranco, setGreyScale(bitmapProvaEmBranco, imageViewProvaEmBranco));
-                Mat gabarito = setBinary(bitmapGabarito, imageViewGabarito, setGreyScale(bitmapGabarito, imageViewGabarito));
-                Utils.matToBitmap(branco, bitmapProvaEmBranco);
-                imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
+                matBranco = setBinary(bitmapProvaEmBranco, imageViewProvaEmBranco, setGreyScale(bitmapProvaEmBranco, imageViewProvaEmBranco));
 
+                Imgproc.dilate(matBranco, matBranco, element);
+
+                Utils.matToBitmap(matBranco, bitmapProvaEmBranco);
+                imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
 
                 storeImage(bitmapProvaEmBranco);
             } else {
-                Toast.makeText(this, "Folha não identificada", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Folha não identificada - primeira foto", Toast.LENGTH_LONG).show();
             }
 
+            Mat matGabarito = new Mat();
+            Bitmap bmpGab = bitmapGabarito.copy(Bitmap.Config.ARGB_8888, true);
+            Utils.bitmapToMat(bmpGab, matGabarito);
+
+            finalCorners = getCorners(matGabarito);
+            if (finalCorners.toArray().length == 4) {
+                Mat result = warpPerspective(matGabarito, finalCorners);
+                Utils.matToBitmap(result, bitmapGabarito);
+
+                matGabarito = setBinary(bitmapGabarito, imageViewGabarito, setGreyScale(bitmapGabarito, imageViewGabarito));                //Imgproc.dilate(matGabarito, matGabarito, element);
+                Imgproc.erode(matGabarito, matGabarito, element);
+
+                Utils.matToBitmap(matGabarito, bitmapGabarito);
+                imageViewGabarito.setImageBitmap(bitmapGabarito);
+
+                storeImage(bitmapGabarito);
+            } else {
+                Toast.makeText(this, "Folha não identificada - segunda foto", Toast.LENGTH_LONG).show();
+
+            }
+
+            Mat r = new Mat();
+
+
+            Core.subtract(matGabarito, matBranco, r);
+
+            kernelSize = 6;
+            element = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(2 * kernelSize + 1, 2 * kernelSize + 1),
+                    new Point(kernelSize, kernelSize));
+            Imgproc.dilate(r, r, element);
 
 
 
+            this.bitmap4 = convertMatToBitMap(r);
+            imageView4.setImageBitmap(bitmap4);
 
 
+            List<MatOfPoint> contours = new ArrayList<>();
+            Mat hierarchy = new Mat();
+            Imgproc.findContours(r, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
-
+            Toast.makeText(this, "COUNTOURS : " +contours.size(), Toast.LENGTH_LONG).show();
 
 
             //Mat branco = setBinary(bitmapProvaEmBranco, imageViewProvaEmBranco, setGreyScale(bitmapProvaEmBranco, imageViewProvaEmBranco));
@@ -426,14 +390,113 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private static Bitmap convertMatToBitMap(Mat input) {
+        Bitmap bmp = null;
+        Mat rgb = new Mat();
+        Imgproc.cvtColor(input, rgb, Imgproc.COLOR_BGR2RGB);
+
+        try {
+            bmp = Bitmap.createBitmap(rgb.cols(), rgb.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(rgb, bmp);
+        } catch (CvException e) {
+            Log.d("Exception", e.getMessage());
+        }
+        return bmp;
+    }
+
+    private Mat warpPerspective(Mat mat, MatOfPoint2f finalCorners) {
+        Size size = getRectangleSize(finalCorners);
+        Mat result = Mat.zeros(size, mat.type());
+        // STEP 10: Homography: Use findHomography to find the affine transformation of your paper sheet
+        Mat homography;
+        MatOfPoint2f dstPoints = new MatOfPoint2f();
+        Point[] arrDstPoints = {new Point(result.cols(), result.rows()), new Point(0, result.rows()), new Point(0, 0), new Point(result.cols(), 0)};
+        dstPoints.fromArray(arrDstPoints);
+        homography = Calib3d.findHomography(finalCorners, dstPoints);
+
+        // STEP 11: Warp the input image using the computed homography matrix
+        Imgproc.warpPerspective(mat, result, homography, size);
+
+        Size out = new Size(bitmapProvaEmBranco.getWidth(), bitmapProvaEmBranco.getHeight());
+        Imgproc.resize(result, result, out);
+        return result;
+    }
+
+    private MatOfPoint2f getCorners(Mat mat) {
+        final double DOWNSCALE_IMAGE_SIZE = 1000;
+        // STEP 1: Resize input image to img_proc to reduce computation
+        double ratio = DOWNSCALE_IMAGE_SIZE / Math.max(mat.width(), mat.height());
+        Size downscaledSize = new Size(mat.width() * ratio, mat.height() * ratio);
+        Mat dst = new Mat(downscaledSize, mat.type());
+        Imgproc.resize(mat, dst, downscaledSize);
+        Mat grayImage = new Mat();
+        Mat detectedEdges = new Mat();
+
+        // STEP 2: convert to grayscale
+        Imgproc.cvtColor(dst, grayImage, Imgproc.COLOR_BGR2GRAY);
+
+        // STEP 3: try to filter text inside document
+        Imgproc.medianBlur(grayImage, detectedEdges, 9);
+
+        // STEP 4: Edge detection
+        Mat edges = new Mat();
+        // Imgproc.erode(edges, edges, new Mat());
+        // Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
+        // canny detector, with ratio of lower:upper threshold of 3:1
+        Imgproc.Canny(detectedEdges, edges, 30, 30 * 3, 3, true);
+
+        // STEP 5: makes the object in white bigger to join nearby lines
+        Imgproc.dilate(edges, edges, new Mat(), new Point(-1, -1), 1); // 1
+
+        //Utils.matToBitmap(edges, bitmapProvaEmBranco);
+        //imageViewProvaEmBranco.setImageBitmap(bitmapProvaEmBranco);
+        //Image imageToShow = Utils.mat2Image(edges);
+        //updateImageView(cannyFrame, imageToShow);
+
+        // STEP 6: Compute the contours
+        List<MatOfPoint> contours = new ArrayList<>();
+        Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+        // STEP 7: Sort the contours by length and only keep the largest one
+        for (int i = 0; i < contours.size(); i++) {
+            MatOfPoint matOfPoint = contours.get(i);
+
+        }
+        MatOfPoint largestContour = getMaxContour(contours);
+
+        // STEP 8: Generate the convex hull of this contour
+        Mat convexHullMask = Mat.zeros(mat.rows(), mat.cols(), mat.type());
+        MatOfInt hullInt = new MatOfInt();
+        Imgproc.convexHull(largestContour, hullInt);
+        MatOfPoint hullPoint = getNewContourFromIndices(largestContour, hullInt);
+
+        // STEP 9: Use approxPolyDP to simplify the convex hull (this should give a quadrilateral)
+        MatOfPoint2f polygon = new MatOfPoint2f();
+        Imgproc.approxPolyDP(convert(hullPoint), polygon, 20, true);
+        List<MatOfPoint> tmp = new ArrayList<>();
+        tmp.add(convert(polygon));
+        restoreScaleMatOfPoint(tmp, ratio);
+        Imgproc.drawContours(convexHullMask, tmp, 0, new Scalar(25, 25, 255), 2);
+        // Image extractImageToShow = Utils.mat2Image(convexHullMask);
+        // updateImageView(extractFrame, extractImageToShow);
+        MatOfPoint2f finalCorners = new MatOfPoint2f();
+        Point[] tmpPoints = polygon.toArray();
+        for (Point point : tmpPoints) {
+            point.x = point.x / ratio;
+            point.y = point.y / ratio;
+        }
+        finalCorners.fromArray(tmpPoints);
+        boolean clockwise = true;
+        double currentThreshold = 30;
+        return finalCorners;
+    }
 
 
     private static MatOfPoint getMaxContour(List<MatOfPoint> contours) {
         double maxVal = 0;
         MatOfPoint largestContour = null;
-        for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++){
+        for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++) {
             double contourArea = Imgproc.contourArea(contours.get(contourIdx));
-            if (maxVal < contourArea){
+            if (maxVal < contourArea) {
                 maxVal = contourArea;
                 largestContour = contours.get(contourIdx);
             }
@@ -560,7 +623,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Mat setBinary(Bitmap bitmap, ImageView imageView, Mat destination) {
         Mat destination2 = new Mat();
-        Imgproc.adaptiveThreshold(destination, destination2, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 7);
+        //Imgproc.adaptiveThreshold(destination, destination2, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 7);
+        Imgproc.threshold(destination, destination2, 95, 255, Imgproc.THRESH_BINARY);
         Utils.matToBitmap(destination2, bitmap);
         storeImage(bitmap);
         imageView.setImageBitmap(bitmap);
@@ -903,6 +967,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Button
         button = findViewById(R.id.button);
+
+        imageView4 = findViewById(R.id.imageView4);
     }
 
 
