@@ -325,7 +325,8 @@ public class MainActivity extends AppCompatActivity {
 
                 Utils.matToBitmap(result, bitmapProvaEmBranco);
 
-                matBranco = setBinary(bitmapProvaEmBranco, imageViewProvaEmBranco, setGreyScale(bitmapProvaEmBranco, imageViewProvaEmBranco));
+                matBranco = setBinary(bitmapProvaEmBranco, imageViewProvaEmBranco,
+                        setGreyScale(bitmapProvaEmBranco, imageViewProvaEmBranco));
 
                 Imgproc.dilate(matBranco, matBranco, element);
 
