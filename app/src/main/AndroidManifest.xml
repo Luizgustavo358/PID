@@ -63,19 +63,15 @@
         <activity android:name=".LimiarizarActivity" />
 
         <!-- Quarta Tela - Gabarito -->
-        <activity android:name=".SelecionaGabarito" />
 
         <!-- Quinta Tela - Lineariza Gabarito -->
-        <activity android:name=".LinearizaGabarito" />
 
         <!-- Quinta Tela - Prova Aluno -->
-        <activity android:name=".ProvaDoAluno" />
 
         <!-- Sexta Tela - Lineariza Prova Aluno -->
-        <activity android:name=".LinearizaProvaAluno" />
 
         <!-- Setima Tela - Nota do Aluno -->
-        <activity android:name=".NotaAluno"></activity>
+        <activity android:name=".NotaAlunoActivity"></activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"

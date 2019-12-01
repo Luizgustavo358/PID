@@ -13,8 +13,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvException;
 import org.opencv.core.Mat;
@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import static com.example.pid.SelecionaProvaActivity.printFiles;
 
 public class LimiarizarActivity extends AppCompatActivity {
 
@@ -44,11 +46,18 @@ public class LimiarizarActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_limiarizar);
+        OpenCVLoader.initDebug();
+
 
         Intent intent = this.getIntent();
         tipoProva = (TipoProva) intent.getSerializableExtra("TIPO_PROVA");
         files = (File[]) intent.getSerializableExtra("FILE");
         file = files[tipoProva.ordinal()];
+
+        System.out.println(this.getClass().getCanonicalName());
+        System.out.println(tipoProva.name());
+        printFiles(files);
+        System.out.println();
 
         initializeViews();
 
@@ -92,7 +101,9 @@ public class LimiarizarActivity extends AppCompatActivity {
                 intent.putExtra("FILE", files);
                 startActivity(intent);
             } else {
-                Toast.makeText(this, "Else", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(this, NotaAlunoActivity.class);
+                intent.putExtra("FILE", files);
+                startActivity(intent);
             }
         });
     }
@@ -136,6 +147,7 @@ public class LimiarizarActivity extends AppCompatActivity {
         Imgproc.threshold(source, dest, thresh, 255, Imgproc.THRESH_BINARY);
         Bitmap bitmap = convertMatToBitMap(dest);
         file = storeImage(bitmap);
+        System.out.println(file == null ? "FILE NULO" : "FILE NAO NULO");
         files[tipoProva.ordinal()] = file;
         imageView.setImageBitmap(bitmap);
         return dest;
@@ -202,8 +214,5 @@ public class LimiarizarActivity extends AppCompatActivity {
         return bmp;
     }
 
-    public void selecionaGabarito(View view) {
-        Intent intent = new Intent(this, SelecionaGabarito.class);
-        startActivity(intent);
-    }
+
 }

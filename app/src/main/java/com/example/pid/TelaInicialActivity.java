@@ -10,6 +10,8 @@ import org.opencv.android.OpenCVLoader;
 
 import java.io.File;
 
+import static com.example.pid.SelecionaProvaActivity.printFiles;
+
 public class TelaInicialActivity extends AppCompatActivity {
 
 
@@ -28,6 +30,11 @@ public class TelaInicialActivity extends AppCompatActivity {
         intent.putExtra("TIPO_PROVA", TipoProva.PROVA_EM_BRANCO);
         File[] files = new File[3];
         intent.putExtra("FILE", files);
+
+        System.out.println(this.getClass().getCanonicalName());
+        System.out.println(TipoProva.PROVA_EM_BRANCO.name());
+        printFiles(files);
+        System.out.println();
 
         startActivity(intent);
     }

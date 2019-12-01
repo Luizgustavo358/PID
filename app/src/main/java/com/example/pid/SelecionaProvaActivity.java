@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
@@ -66,11 +67,18 @@ public class SelecionaProvaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_seleciona_prova);
+        OpenCVLoader.initDebug();
 
         Intent intent = getIntent();
         String title = intent.getStringExtra("TITLE");
         tipoProva = (TipoProva) intent.getSerializableExtra("TIPO_PROVA");
         files = (File[]) intent.getSerializableExtra("FILE");
+
+
+        System.out.println(this.getClass().getCanonicalName());
+        System.out.println(tipoProva.name());
+        printFiles(files);
+        System.out.println();
 
         initializeViews();
 
@@ -129,8 +137,6 @@ public class SelecionaProvaActivity extends AppCompatActivity {
         btnLimiarizar.setOnClickListener(v -> {
             Intent intent = new Intent(this, LimiarizarActivity.class);
 
-
-            File[] files = new File[3];
             files[tipoProva.ordinal()] = file;
             intent.putExtra("FILE", files);
             intent.putExtra("TIPO_PROVA", tipoProva);
@@ -534,7 +540,6 @@ public class SelecionaProvaActivity extends AppCompatActivity {
                 ExifInterface exif = new ExifInterface(path);
                 int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
 
-                Toast.makeText(this, "Branco Orientation: " + orientation, Toast.LENGTH_LONG).show();
 
                 if (orientation == 6) {
                     Matrix matrix = new Matrix();
@@ -621,7 +626,6 @@ public class SelecionaProvaActivity extends AppCompatActivity {
             ExifInterface exif = new ExifInterface(filePath);
             int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
 
-            Toast.makeText(this, "Branco Orientation: " + orientation, Toast.LENGTH_LONG).show();
             if (orientation == 6) {
                 Matrix matrix = new Matrix();
                 matrix.postRotate(90);
@@ -645,5 +649,14 @@ public class SelecionaProvaActivity extends AppCompatActivity {
         Utils.matToBitmap(destination, bitmap);
         imageView.setImageBitmap(bitmap);
         return destination;
+    }
+
+    public static void printFiles(File[] files) {
+        System.out.println("FILE ARRAY: ");
+        int i = 0;
+        for (File file : files) {
+            System.out.println("" + i++ +": " + (file == null ? "FILE NULO" : "FILE NAO NULO"));
+
+        }
     }
 }
