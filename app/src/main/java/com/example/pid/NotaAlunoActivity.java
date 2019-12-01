@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.opencv.android.OpenCVLoader;
@@ -31,9 +32,10 @@ public class NotaAlunoActivity extends AppCompatActivity {
 
     File files[];
     ImageView imageView;
-    Button btnComecarDeNovo, btnCalcNota, btnProximaProva;
+    Button btnComecarDeNovo, btnProximaProva;
     Mat branco, gabarito, resposta;
     private final static int THRESHOLD = 30;
+    TextView txtErradas;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +104,8 @@ public class NotaAlunoActivity extends AppCompatActivity {
                 }
             }
 
-            Toast.makeText(this, "Objetos : " + objects, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Objetos (Questões erradas): " + objects, Toast.LENGTH_LONG).show();
+            txtErradas.setText("" + objects);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -163,10 +166,10 @@ public class NotaAlunoActivity extends AppCompatActivity {
 
 
     private void initializeViews() {
-        imageView = (ImageView) findViewById(R.id.imageView5);
-        btnCalcNota = findViewById(R.id.btnCalcularNota);
+        imageView = findViewById(R.id.imageView5);
         btnComecarDeNovo = findViewById(R.id.btnComecar);
         btnProximaProva = findViewById(R.id.btnProximaProva);
+        txtErradas = findViewById(R.id.txtErradas);
     }
 
     /**
