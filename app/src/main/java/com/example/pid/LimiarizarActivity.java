@@ -143,7 +143,6 @@ public class LimiarizarActivity extends AppCompatActivity {
         Utils.bitmapToMat(originalBitmap, source);
 
         Mat dest = new Mat();
-        //Imgproc.adaptiveThreshold(destination, destination2, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 11, 7);
         Imgproc.threshold(source, dest, thresh, 255, Imgproc.THRESH_BINARY);
         Bitmap bitmap = convertMatToBitMap(dest);
         file = storeImage(bitmap);
