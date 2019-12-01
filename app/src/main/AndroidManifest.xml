@@ -2,13 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.pid">
+
     <!-- Permissoes -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.hardware.camera.autofocus" /> <!-- Feature -->
+    <uses-permission android:name="android.hardware.camera.autofocus" />
+
+    <!-- Feature -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
@@ -32,7 +35,7 @@
         tools:ignore="GoogleAppIndexingWarning">
 
 
-
+        <!-- Tela - Inicial -->
         <activity
             android:name=".TelaInicialActivity"
             android:label="Inicial"
@@ -44,34 +47,26 @@
             </intent-filter>
         </activity>
 
-        <!-- Primeira Tela - Inicial -->
-        <activity
-            android:name=".MainActivity"
-            android:label="Main"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+<!--        <activity-->
+<!--            android:name=".MainActivity"-->
+<!--            android:label="Main"-->
+<!--            android:screenOrientation="portrait">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
 
-        <!-- Segunda Tela - Prova em Branco -->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
+
+        <!-- Tela - Seleciona Prova -->
         <activity android:name=".SelecionaProvaActivity" />
 
-        <!-- Terceira Tela - Linearizar Prova em Branco -->
+        <!-- Tela - Linearizar Prova -->
         <activity android:name=".LimiarizarActivity" />
 
-        <!-- Quarta Tela - Gabarito -->
-
-        <!-- Quinta Tela - Lineariza Gabarito -->
-
-        <!-- Quinta Tela - Prova Aluno -->
-
-        <!-- Sexta Tela - Lineariza Prova Aluno -->
-
-        <!-- Setima Tela - Nota do Aluno -->
-        <activity android:name=".NotaAlunoActivity"></activity>
+        <!-- Tela - Nota do Aluno -->
+        <activity android:name=".NotaAlunoActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
