@@ -112,6 +112,7 @@ public class SelecionaProvaActivity extends AppCompatActivity {
         });
 
         btnRedimensionar.setOnClickListener(v -> {
+            long begin = System.nanoTime();
             Mat a = new Mat();
             Bitmap bmp32 = bitmapProva.copy(Bitmap.Config.ARGB_8888, true);
             Utils.bitmapToMat(bmp32, a);
@@ -132,6 +133,8 @@ public class SelecionaProvaActivity extends AppCompatActivity {
                 System.out.println("ERROR");
                 Toast.makeText(this, "Folha não identificada - primeira foto", Toast.LENGTH_LONG).show();
             }
+            long end = System.nanoTime();
+            System.out.printf("EXECUTION TIME - PERSPECTIVE: %d\n", end - begin);
         });
 
         btnLimiarizar.setOnClickListener(v -> {
@@ -641,6 +644,7 @@ public class SelecionaProvaActivity extends AppCompatActivity {
     }
 
     private Mat setGreyScale(Bitmap bitmap, ImageView imageView) {
+        long begin = System.nanoTime();
         Mat mat = new Mat();
         Bitmap bmp32 = bitmap.copy(Bitmap.Config.ARGB_8888, true);
         Utils.bitmapToMat(bmp32, mat);
@@ -648,6 +652,8 @@ public class SelecionaProvaActivity extends AppCompatActivity {
         Imgproc.cvtColor(mat, destination, Imgproc.COLOR_RGB2GRAY);
         Utils.matToBitmap(destination, bitmap);
         imageView.setImageBitmap(bitmap);
+        long end = System.nanoTime();
+        System.out.printf("EXECUTION TIME - GREYSCALE: %d\n", end - begin);
         return destination;
     }
 

@@ -52,6 +52,8 @@ public class NotaAlunoActivity extends AppCompatActivity {
         try {
             setMats();
 
+            long begin = System.nanoTime();
+
             int kernelSize = 4;
             Mat element4 = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(2 * kernelSize + 1, 2 * kernelSize + 1),
                     new Point(kernelSize, kernelSize));
@@ -103,6 +105,9 @@ public class NotaAlunoActivity extends AppCompatActivity {
                     objects++;
                 }
             }
+            long end = System.nanoTime();
+            System.out.printf("EXECUTION TIME - COMPUTE ERROS: %d\n", end - begin);
+
 
             Toast.makeText(this, "Objetos (Questões erradas): " + objects, Toast.LENGTH_LONG).show();
             txtErradas.setText("" + objects);

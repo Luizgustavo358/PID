@@ -138,6 +138,7 @@ public class LimiarizarActivity extends AppCompatActivity {
     }
 
     private Mat setBinary(ImageView imageView) {
+        long begin = System.nanoTime();
 
         Mat source = new Mat();
         Utils.bitmapToMat(originalBitmap, source);
@@ -149,6 +150,9 @@ public class LimiarizarActivity extends AppCompatActivity {
         System.out.println(file == null ? "FILE NULO" : "FILE NAO NULO");
         files[tipoProva.ordinal()] = file;
         imageView.setImageBitmap(bitmap);
+
+        long end = System.nanoTime();
+        System.out.printf("EXECUTION TIME - BINARIZE: %d\n", end - begin);
         return dest;
     }
 
